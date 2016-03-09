@@ -13,6 +13,13 @@ $sudo apt-get install apache2
 $sudo apt-get install libapache2-mod-wsgi-py3
 ```
 
+# Installing PostgreSQL
+```
+$sudo apt-get install postgresql
+$sudo apt-get install libpq-dev
+$sudo pip3 install psycopg2
+```
+
 # Configuring Apache2 Web Server
 Enable mod_wsgi:
 ```
@@ -30,6 +37,37 @@ WSGIPythonPath /var/www/ProjectManager
         Order deny,allow
     </Files>
 </Directory>
+```
+
+# Configuring PostgreSQL
+Set postgres password
+```
+$sudo -u postgres psql
+postgres=# \password postgres
+Enter new password:
+Enter it again:
+postgres=# \q
+```
+
+Create project_manager database
+```
+$sudo -u postgres psql
+postgres=# CREATE DATABASE "project_manager" WITH OWNER "postgres" ENCODING 'UTF-8';
+postgres=# \q
+```
+
+# Configure Application settings
+Edit /var/www/ProjectManager/ProjectManager/settings.py. Set database password in
+```
+DATABASES = {
+    'default': {
+        ...
+        ...
+        'PASSWORD': '<mypassword>',
+        ...
+        ...
+    }
+}
 ```
 
 # Running Django Web Server (Developer mode)
