@@ -5,6 +5,7 @@
 $sudo apt-get install python3
 $sudo apt-get install python3-pip
 $sudo pip3 install Django
+$sudo pip3 install django-bootstrap3
 ```
 
 # Installing Apache2 Web Server
