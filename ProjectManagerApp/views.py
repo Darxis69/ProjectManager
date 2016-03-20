@@ -12,7 +12,7 @@ class LoginFormView(FormView):
 
     def get_context_data(self, **kwargs):
         context = super(LoginFormView, self).get_context_data(**kwargs)
-        context['form'] = LoginForm()
+        context['login_form'] = LoginForm()
         return context
 
     def get(self, request, *args, **kwargs):

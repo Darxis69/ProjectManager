@@ -1,13 +1,27 @@
 {% extends "layout.html" %}
 {% load bootstrap3 %}
 {% block content %}
-    <form action="/login/" method="POST" class="form">
-    {% csrf_token %}
-    {% bootstrap_form form %}
-    {% buttons %}
-        <button type="submit" class="btn btn-primary">
-            {% bootstrap_icon "star" %} Submit
-        </button>
-    {% endbuttons %}
-    </form>
+    <div class="mainbox col-md-6 col-md-offset-3">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <div class="panel-title">Login</div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="/account/resetPassword">Forgot password?</a></div>
+            </div>
+            <div class="panel-body">
+                <form action="/login/" method="POST" class="form">
+                    {% csrf_token %}
+                    {% bootstrap_form login_form %}
+                    {% buttons %}
+                        {% bootstrap_button "Login" button_type="submit" button_class="btn btn-primary" %}
+                    {% endbuttons %}
+                </form>
+                <div class="col-md-12 control">
+                    <div style="border-top: 1px solid#888; padding-top: 15px; font-size:86%;">
+                        Don't have an account?
+                        <a href="/account/create">Sign Up here!</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
