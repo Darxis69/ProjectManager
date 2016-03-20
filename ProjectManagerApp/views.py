@@ -29,3 +29,7 @@ class LoginFormView(FormView):
 
         return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
+
+def logout(request):
+    # TODO Logout in AuthenticationService
+    return HttpResponseRedirect('/login')

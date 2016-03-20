@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'jquery',
     'bootstrap3',
+    'ProjectManagerApp',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -67,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ProjectManagerApp.context_processors.authenticated_user_processor',
             ],
         },
     },
