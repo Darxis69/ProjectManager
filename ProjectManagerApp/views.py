@@ -1,4 +1,6 @@
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout as logoutFunc
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -25,12 +27,14 @@ class LoginFormView(FormView):
             username = self.request.POST['username']
             password = self.request.POST['password']
 
-            if authenticate(username=username, password=password) is not None:
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
                 return HttpResponseRedirect('/index')
 
         return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
 
 def logout(request):
-    # TODO Logout in AuthenticationService
-    return HttpResponseRedirect('/login')
+    logoutFunc(request)
+    return HttpResponseRedirect('/account/login')

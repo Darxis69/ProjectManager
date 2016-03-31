@@ -29,7 +29,7 @@
         </div>
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="nav navbar-nav">
-                {% if is_user_authenticated  %}
+                {% if user.is_authenticated %}
                     <li class="active"><a href="/index">Home</a></li>
                     <li><a href="/projects">Projects</a></li>
                     <li><a href="/teams">Teams</a></li>
@@ -49,12 +49,12 @@
             </ul>
 
             <ul class="nav navbar-nav navbar-right" role="navigation">
-                {% if not is_user_authenticated  %}
-                    <li><a href="/login">Login</a></li>
+                {% if not user.is_authenticated  %}
+                    <li><a href="/account/login">Login</a></li>
                     <li><a href="/account/create">Create account</a></li>
                 {% else %}
                     <li><a href="/account">My account</a></li>
-                    <li><a href="/logout">Logout</a></li>
+                    <li><a href="/account/logout">Logout</a></li>
                 {% endif %}
             </ul>
         </div>

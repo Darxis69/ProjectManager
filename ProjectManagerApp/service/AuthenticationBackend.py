@@ -1,19 +1,21 @@
+from django.contrib.auth import get_user
 from django.contrib.auth.models import User
 
 
 class AuthenticationBackend(object):
-    @staticmethod
-    def authenticate(username=None, password=None):
-        if username == "admin" and password == "pass":
-            user = User(username=username)
-            return user
+    def authenticate(self, username=None, password=None):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return None
 
-        return None
+        if user.check_password(password) is False:
+            return None
 
-    @staticmethod
-    def get_user(user_id):
+        return user
+
+    def get_user(self, user_id):
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
-
