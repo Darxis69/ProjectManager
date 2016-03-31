@@ -4,6 +4,6 @@ from ProjectManagerApp.views import LoginFormView
 from . import views
 
 urlpatterns = {
-    url(r'^login/$', LoginFormView.as_view(), name='login'),
-    url(r'^logout/$', views.logout, name='logout'),
+    url(r'^account/login/$', LoginFormView.as_view(), name='login'),
+    url(r'^account/logout/$', views.logout, name='logout'),
 }
