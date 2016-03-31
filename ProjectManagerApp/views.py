@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -24,7 +25,7 @@ class LoginFormView(FormView):
             username = self.request.POST['username']
             password = self.request.POST['password']
 
-            if username == 'admin' and password == 'admin':
+            if authenticate(username=username, password=password) is not None:
                 return HttpResponseRedirect('/index')
 
         return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
