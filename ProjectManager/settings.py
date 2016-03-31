@@ -113,6 +113,10 @@ AUTHENTICATION_BACKENDS = [
     'ProjectManagerApp.service.AuthenticationBackend.AuthenticationBackend',
 ]
 
+BOOTSTRAP3 = {
+    'success_css_class': None,
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
