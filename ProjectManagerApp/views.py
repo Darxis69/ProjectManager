@@ -10,7 +10,7 @@ from ProjectManagerApp.forms import LoginForm
 
 
 class LoginFormView(FormView):
-    template_name = 'login.html'
+    template_name = 'account/login.html'
     form_class = LoginForm
 
     def get_context_data(self, **kwargs):
