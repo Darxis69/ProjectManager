@@ -16,11 +16,11 @@ class UserBase(User):
     pass
 
 
-class Teacher(models.Model):
+class Teacher(UserBase):
     pass
 
 
-class Student(models.Model):
+class Student(UserBase):
     student_no = models.IntegerField()
 
 
