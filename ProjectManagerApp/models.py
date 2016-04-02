@@ -24,9 +24,9 @@ class Student(models.Model):
     student_no = models.IntegerField()
 
 
-class Team(models.Model):
-    first_teammate = models.ForeignKey(Student, on_delete=models.CASCADE)
-    second_teammate = models.ForeignKey(Student, on_delete=models.CASCADE)
+# class Team(models.Model):
+#     first_teammate = models.ForeignKey(Student, on_delete=models.CASCADE)
+#     second_teammate = models.ForeignKey(Student, on_delete=models.CASCADE)
 
 # class Project(models.Model):
 #     PROJECT_STATUS = (
