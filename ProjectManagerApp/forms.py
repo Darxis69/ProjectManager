@@ -33,3 +33,7 @@ class AccountCreateForm(forms.Form):
             raise ValidationError("Passwords don't match.", code='not_match')
 
         return self.cleaned_data
+
+class ProjectCreateForm(forms.Form):
+    name = forms.CharField(label='Project name')
+    description = forms.CharField(label="Description")
