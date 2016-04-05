@@ -7,7 +7,7 @@ from django.template import RequestContext
 from django.views.generic import FormView
 
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm
-
+from ProjectManagerApp.models import Project
 
 class AccountCreateFormView(FormView):
     template_name = 'account/create.html'
@@ -110,17 +110,16 @@ class ProjectCreateFormView(FormView):
 
         project_create_form = ProjectCreateForm(request.POST)
         if project_create_form.is_valid():
-            #user = User()
-            #user.username = project_create_form.cleaned_data.get('username')
-            #user.email = project_create_form.cleaned_data.get('email')
-            #user.set_password(project_create_form.cleaned_data.get('password'))
-            #user.is_staff = True if project_create_form.cleaned_data['account_type'] == AccountCreateForm.ACCOUNT_TYPE_STAFF else False
+            project = Project()
+            project.name = project_create_form.cleaned_data.get('name')
+            project.description = project_create_form.cleaned_data.get('description')
+            project.status = 'O'
 
-            #try:
-            #    user.save()
-            #except IntegrityError:
-            #    project_create_form.add_error('username', 'User with given username already exists.')
-            #    return render_to_response(self.template_name, self.create_context_data(project_create_form), context_instance=RequestContext(request))
+            try:
+                project.save()
+            except IntegrityError:
+                project_create_form.add_error('name', 'Project with given name already exists.')
+                return render_to_response(self.template_name, self.create_context_data(project_create_form), context_instance=RequestContext(request))
 
             return HttpResponseRedirect('/projects/create')
 
