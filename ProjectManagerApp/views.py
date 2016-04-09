@@ -136,6 +136,7 @@ class ProjectCreateFormView(FormView):
             project.name = project_create_form.cleaned_data.get('name')
             project.description = project_create_form.cleaned_data.get('description')
             project.status = Project.PROJECT_STATUS_OPEN
+            project.author = request.user
 
             try:
                 project.save()
@@ -146,6 +147,3 @@ class ProjectCreateFormView(FormView):
             return HttpResponseRedirect('/projects/create')
 
         return render_to_response(self.template_name, self.create_context_data(project_create_form), context_instance=RequestContext(request))
-
-
-

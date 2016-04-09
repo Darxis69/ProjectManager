@@ -18,6 +18,7 @@ class Team(models.Model):
     first_teammate = models.ForeignKey(Student, null=True, related_name="first_student", on_delete=models.SET_NULL)
     second_teammate = models.ForeignKey(Student, null=True, related_name="second_student", on_delete=models.SET_NULL)
 
+
 class Project(models.Model):
     PROJECT_STATUS_OPEN = 'O'
     PROJECT_STATUS_OPEN_LABEL = 'Open'
@@ -32,3 +33,4 @@ class Project(models.Model):
     description = models.CharField(max_length=200)
     status = models.CharField(max_length=1, choices=PROJECT_STATUS)
     assigned_team = models.OneToOneField(Team, null=True, on_delete=models.SET_NULL)
+    author = models.ForeignKey(Teacher, null=False, related_name="author", on_delete=models.CASCADE)
