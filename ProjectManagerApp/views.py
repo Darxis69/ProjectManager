@@ -82,9 +82,17 @@ class LoginFormView(FormView):
         return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
 
+def index(request):
+    if request.user.is_authenticated():
+        return HttpResponseRedirect('/index')
+
+    return HttpResponseRedirect('/account/login')
+
+
 def logout(request):
     auth_logout(request)
     return HttpResponseRedirect('/account/login')
+
 
 class ProjectCreateFormView(FormView):
     template_name = 'project/create.html'
