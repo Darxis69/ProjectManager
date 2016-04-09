@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout
-from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -7,7 +6,8 @@ from django.template import RequestContext
 from django.views.generic import FormView
 
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm
-from ProjectManagerApp.models import Project
+from ProjectManagerApp.models import Project, Teacher, Student
+
 
 class AccountCreateFormView(FormView):
     template_name = 'account/create.html'
@@ -33,11 +33,17 @@ class AccountCreateFormView(FormView):
 
         account_create_form = AccountCreateForm(request.POST)
         if account_create_form.is_valid():
-            user = User()
+            if account_create_form.cleaned_data['account_type'] == AccountCreateForm.ACCOUNT_TYPE_STAFF:
+                user = Teacher()
+                user.is_staff = True
+            else:
+                user = Student()
+                user.is_staff = False
+                user.student_no = account_create_form.cleaned_data.get('student_no')
+
             user.username = account_create_form.cleaned_data.get('username')
             user.email = account_create_form.cleaned_data.get('email')
             user.set_password(account_create_form.cleaned_data.get('password'))
-            user.is_staff = True if account_create_form.cleaned_data['account_type'] == AccountCreateForm.ACCOUNT_TYPE_STAFF else False
 
             try:
                 user.save()

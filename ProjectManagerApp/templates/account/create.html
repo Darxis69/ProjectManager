@@ -14,6 +14,18 @@
                         {% bootstrap_button "Create" button_type="submit" button_class="btn btn-primary" %}
                     {% endbuttons %}
                 </form>
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('#id_account_type').on('change', function() {
+                            if ( this.value == '1') {
+                                $("#id_student_no").closest("div").show();
+                            }
+                            else {
+                                $("#id_student_no").closest("div").hide();
+                            }
+                        });
+                    });
+                </script>
             </div>
         </div>
     </div>
