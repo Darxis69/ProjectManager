@@ -19,9 +19,13 @@ class Team(models.Model):
     second_teammate = models.ForeignKey(Student, null=True, related_name="second_student", on_delete=models.SET_NULL)
 
 class Project(models.Model):
+    PROJECT_STATUS_OPEN = 'O'
+    PROJECT_STATUS_OPEN_LABEL = 'Open'
+    PROJECT_STATUS_CLOSED = 'C'
+    PROJECT_STATUS_CLOSED_LABEL = 'Closed'
     PROJECT_STATUS = (
-         ('O', 'Open'),
-         ('C', 'Closed')
+         (PROJECT_STATUS_OPEN, PROJECT_STATUS_OPEN_LABEL),
+         (PROJECT_STATUS_CLOSED, PROJECT_STATUS_CLOSED_LABEL)
      )
 
     name = models.CharField(max_length=50)

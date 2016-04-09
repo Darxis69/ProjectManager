@@ -121,7 +121,7 @@ class ProjectCreateFormView(FormView):
             project = Project()
             project.name = project_create_form.cleaned_data.get('name')
             project.description = project_create_form.cleaned_data.get('description')
-            project.status = 'O'
+            project.status = Project.PROJECT_STATUS_OPEN
 
             try:
                 project.save()
