@@ -116,11 +116,19 @@ class ProjectCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
+        # TODO Error message with redirect
+        if not isinstance(request.user, Teacher):
+            return HttpResponseRedirect('/index')
+
         return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
+
+        # TODO Error message with redirect
+        if not isinstance(request.user, Teacher):
+            return HttpResponseRedirect('/index')
 
         project_create_form = ProjectCreateForm(request.POST)
         if project_create_form.is_valid():
@@ -138,4 +146,6 @@ class ProjectCreateFormView(FormView):
             return HttpResponseRedirect('/projects/create')
 
         return render_to_response(self.template_name, self.create_context_data(project_create_form), context_instance=RequestContext(request))
+
+
 
