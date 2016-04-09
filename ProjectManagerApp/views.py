@@ -107,14 +107,14 @@ class ProjectCreateFormView(FormView):
         return context
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return HttpResponseRedirect('/index')
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/account/login')
 
         return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return HttpResponseRedirect('/index')
+        if not request.user.is_authenticated():
+            return HttpResponseRedirect('/account/login')
 
         project_create_form = ProjectCreateForm(request.POST)
         if project_create_form.is_valid():
