@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.generic import FormView
+from django.views.generic import TemplateView
 
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm
 from ProjectManagerApp.models import Project, Teacher, Student
@@ -88,11 +89,18 @@ class LoginFormView(FormView):
         return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
 
-def index(request):
-    if request.user.is_authenticated():
-        return HttpResponseRedirect('/index')
+class IndexView(TemplateView):
+    template_name = 'index.html'
 
-    return HttpResponseRedirect('/account/login')
+    def get_context_data(self, **kwargs):
+        context = super(IndexView, self).get_context_data(**kwargs)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
+
+        return HttpResponseRedirect('/account/login')
 
 
 def logout(request):
