@@ -48,3 +48,7 @@ class AccountCreateForm(forms.Form):
 class ProjectCreateForm(forms.Form):
     name = forms.CharField(label='Project name')
     description = forms.CharField(label="Description", widget=forms.Textarea)
+
+
+class TeamCreateForm(forms.Form):
+    name = forms.CharField(label='Team name')
