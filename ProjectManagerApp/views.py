@@ -177,10 +177,27 @@ class TeamCreateFormView(FormView):
                 return render_to_response(self.template_name, self.create_context_data(team_create_form),
                                           context_instance=RequestContext(request))
 
-            return HttpResponseRedirect('/teams/create')
+            return HttpResponseRedirect('/teams')
 
         return render_to_response(self.template_name, self.create_context_data(team_create_form),
                                   context_instance=RequestContext(request))
+
+
+class ProjectListView(TemplateView):
+    template_name = 'project/list.html'
+
+    def get_context_data(self, projects, **kwargs):
+        context = super(ProjectListView, self).get_context_data(**kwargs)
+        context['projects'] = projects
+        return context
+
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated():
+            projects = Project.objects.all()
+            return render_to_response(self.template_name, self.get_context_data(projects),
+                                      context_instance=RequestContext(request))
+
+        return HttpResponseRedirect('/account/login')
 
 
 class ProjectCreateFormView(FormView):
@@ -230,7 +247,7 @@ class ProjectCreateFormView(FormView):
                 return render_to_response(self.template_name, self.create_context_data(project_create_form),
                                           context_instance=RequestContext(request))
 
-            return HttpResponseRedirect('/projects/create')
+            return HttpResponseRedirect('/projects')
 
         return render_to_response(self.template_name, self.create_context_data(project_create_form),
                                   context_instance=RequestContext(request))
