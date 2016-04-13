@@ -49,6 +49,12 @@ DATABASES = {
 }
 ```
 
+## Create database schema
+```
+$sudo python3 manage.py makemigrations
+$sudo python3 manage.py migrate
+```
+
 # Running instructions
 
 ## Running Django Web Server (Developer mode)
