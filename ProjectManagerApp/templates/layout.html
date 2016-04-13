@@ -32,20 +32,24 @@
                 {% if user.is_authenticated %}
                     <li class="active"><a href="/index">Home</a></li>
                     <li class="dropdown">
-                      <a href="/projects" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Projects<span class="caret"></span></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="/projects/create">Create</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li><a href="#">Separated link</a></li>
-                      </ul>
+                        <a href="/projects" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Projects<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            {% if not is_student  %}
+                                <li><a href="/projects/create">Create</a></li>
+                                <li role="separator" class="divider"></li>
+                            {% endif %}
+                            <li><a href="/projects">List</a></li>
+                        </ul>
                     </li>
                     <li class="dropdown">
-                      <a href="/teams" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Teams<span class="caret"></span></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="/teams/create">Create</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li><a href="#">Separated link</a></li>
-                      </ul>
+                        <a href="/teams" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Teams<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            {% if is_student  %}
+                                <li><a href="/teams/create">Create</a></li>
+                                <li role="separator" class="divider"></li>
+                            {% endif %}
+                            <li><a href="/teams">List</a></li>
+                        </ul>
                     </li>
                 {% endif %}
             </ul>
