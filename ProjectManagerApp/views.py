@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout
+from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -65,17 +66,16 @@ class LoginFormView(FormView):
     template_name = 'account/login.html'
     form_class = LoginForm
 
-    def get_context_data(self, login_failed, **kwargs):
+    def get_context_data(self, **kwargs):
         context = super(LoginFormView, self).get_context_data(**kwargs)
         context['login_form'] = LoginForm()
-        context['login_failed'] = login_failed
         return context
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated():
             return HttpResponseRedirect('/index')
 
-        return render_to_response(self.template_name, self.get_context_data(False),
+        return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
@@ -91,7 +91,8 @@ class LoginFormView(FormView):
                 auth_login(request, user)
                 return HttpResponseRedirect('/index')
 
-        return render_to_response(self.template_name, self.get_context_data(True),
+        messages.add_message(request, messages.ERROR, 'Username or password is incorrect. Try again.')
+        return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
 
 
@@ -125,7 +126,6 @@ class TeamListView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            #TODO Try/catch needed?
             teams = Team.objects.all()
             return render_to_response(self.template_name, self.get_context_data(teams),
                                       context_instance=RequestContext(request))
@@ -171,7 +171,7 @@ class TeamCreateFormView(FormView):
             team.name = team_create_form.cleaned_data.get('name')
             team.first_teammate = request.user
 
-            #TODO: Try/catch needed?
+            # TODO  Try/catch needed?
             team.save()
 
             return HttpResponseRedirect('/teams')
@@ -190,7 +190,6 @@ class ProjectListView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            #TODO Try/catch needed?
             projects = Project.objects.all()
             return render_to_response(self.template_name, self.get_context_data(projects),
                                       context_instance=RequestContext(request))
@@ -228,6 +227,7 @@ class ProjectCreateFormView(FormView):
 
         # TODO Error message with redirect
         if not isinstance(request.user, Teacher):
+            # messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
             return HttpResponseRedirect('/index')
 
         project_create_form = ProjectCreateForm(request.POST)

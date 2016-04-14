@@ -11,7 +11,6 @@
     {% endblock %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-    {% bootstrap_messages %}
 </head>
 <body>
 
@@ -25,7 +24,7 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a href="#" class="navbar-brand">Project manager</a>
+            <a href="/index" class="navbar-brand">Project manager</a>
         </div>
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="nav navbar-nav">
@@ -67,6 +66,9 @@
     </div>
 </nav>
 <div class="container" style="padding: 80px">
+    <div class="col-md-6 col-md-offset-3">
+        {% bootstrap_messages %}
+    </div>
 {% block content %}
 {% endblock %}
 </div>
