@@ -65,23 +65,23 @@ class LoginFormView(FormView):
     template_name = 'account/login.html'
     form_class = LoginForm
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, login_failed, **kwargs):
         context = super(LoginFormView, self).get_context_data(**kwargs)
         context['login_form'] = LoginForm()
+        context['login_failed'] = login_failed
         return context
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated():
             return HttpResponseRedirect('/index')
 
-        return render_to_response(self.template_name, self.get_context_data(),
+        return render_to_response(self.template_name, self.get_context_data(False),
                                   context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
             return HttpResponseRedirect('/index')
 
-        username = password = ''
         if self.request.POST:
             username = self.request.POST['username']
             password = self.request.POST['password']
@@ -91,7 +91,7 @@ class LoginFormView(FormView):
                 auth_login(request, user)
                 return HttpResponseRedirect('/index')
 
-        return render_to_response(self.template_name, self.get_context_data(),
+        return render_to_response(self.template_name, self.get_context_data(True),
                                   context_instance=RequestContext(request))
 
 
