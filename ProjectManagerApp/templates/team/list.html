@@ -5,16 +5,36 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">List of all teams</div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="/teams/create">Create team</a></div>
             </div>
             <div class="panel-body">
                 {% if teams %}
-                    <ul>
-                        {% for team in teams %}
-                            <li>
-                                <a href="/index">{{ team.name }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <div class="table">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Team name</th>
+                                    <th>First student</th>
+                                    <th>Second student</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for team in teams %}
+                                <tr>
+                                    <td>{{ team.name }}</td>
+                                    <td>{{ team.first_teammate }}</td>
+                                    <td>{{ team.second_teammate }}</td>
+                                    <td>
+                                        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i><!--Join-->
+                                        <i class="glyphicon glyphicon-log-out" aria-hidden="true"></i><!--Leave-->
+                                        <i class="glyphicon glyphicon-trash" aria-hidden="true"></i><!--Delete-->
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% else %}
                     <p>No teams found.</p>
                 {% endif %}
