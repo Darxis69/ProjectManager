@@ -16,7 +16,7 @@ class Student(UserBase):
 
 class Team(models.Model):
     name = models.CharField(max_length=50)
-    first_teammate = models.ForeignKey(Student, null=False, related_name="first_student", on_delete=models.CASCADE)
+    first_teammate = models.ForeignKey(Student, null=True, related_name="first_student", on_delete=models.SET_NULL)
     second_teammate = models.ForeignKey(Student, null=True, related_name="second_student", on_delete=models.SET_NULL)
 
 
