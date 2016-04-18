@@ -56,6 +56,7 @@ class AccountCreateFormView(FormView):
                 return render_to_response(self.template_name, self.create_context_data(account_create_form),
                                           context_instance=RequestContext(request))
 
+            messages.add_message(request, messages.SUCCESS, 'Account created.')
             return HttpResponseRedirect('/account/login')
 
         return render_to_response(self.template_name, self.create_context_data(account_create_form),
