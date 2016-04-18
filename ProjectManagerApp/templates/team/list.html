@@ -25,10 +25,22 @@
                                     <td>{{ team.name }}</td>
                                     <td>{{ team.first_teammate }}</td>
                                     <td>{{ team.second_teammate }}</td>
-                                    <td>
-                                        <i class="glyphicon glyphicon-plus" aria-hidden="true"></i><!--Join-->
-                                        <i class="glyphicon glyphicon-log-out" aria-hidden="true"></i><!--Leave-->
-                                        <i class="glyphicon glyphicon-trash" aria-hidden="true"></i><!--Delete-->
+                                    <td align="center">
+                                        {% if request.user == team.first_teammate or request.user == team.second_teammate %}
+                                            <form method="post" action="/teams/leave/">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary" name="team_id" value={{ team.id }}>
+                                                    <i class="glyphicon glyphicon-log-out" aria-hidden="true" title="Leave"></i>
+                                                </button>
+                                            </form>
+                                        {% elif not team.first_teammate or not team.second_teammate %}
+                                            <form method="post" action="/teams/join/">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary" name="team_id" value={{ team.id }}>
+                                                    <i class="glyphicon glyphicon-plus" aria-hidden="true" title="Join"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% endfor %}

@@ -113,7 +113,6 @@ class IndexView(TemplateView):
 
 def logout(request):
     auth_logout(request)
-    messages.add_message(request, messages.SUCCESS, 'You have successfully logged out.')
     return HttpResponseRedirect('/account/login')
 
 
@@ -177,6 +176,31 @@ class TeamCreateFormView(FormView):
 
         return render_to_response(self.template_name, self.create_context_data(team_create_form),
                                   context_instance=RequestContext(request))
+
+
+def team_join(request):
+    team = Team.objects.get(id=request.POST.get('team_id'))
+    if team.first_teammate is None:
+        team.first_teammate = request.user
+    elif team.second_teammate is None:
+        team.second_teammate = request.user
+    team.save(force_update=True)
+    return HttpResponseRedirect('/teams')
+
+
+def team_leave(request):
+    team = Team.objects.get(id=request.POST.get('team_id'))
+    if team.first_teammate == request.user:
+        team.first_teammate = None
+    elif team.second_teammate == request.user:
+        team.second_teammate = None
+    team.save(force_update=True)
+
+    if team.first_teammate is None and team.second_teammate is None:
+        # TODO exception checking
+        team.delete()
+        messages.add_message(request, messages.INFO, 'Team was deleted.')
+    return HttpResponseRedirect('/teams')
 
 
 class ProjectListView(TemplateView):
