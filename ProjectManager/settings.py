@@ -140,4 +140,4 @@ STATIC_URL = '/static/'
 
 # Messages configuration
 
-MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'

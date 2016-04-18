@@ -113,6 +113,7 @@ class IndexView(TemplateView):
 
 def logout(request):
     auth_logout(request)
+    messages.add_message(request, messages.SUCCESS, 'You have successfully logged out.')
     return HttpResponseRedirect('/account/login')
 
 
@@ -150,8 +151,8 @@ class TeamCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        # TODO Error message with redirect
         if not isinstance(request.user, Student):
+            messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
             return HttpResponseRedirect('/index')
 
         return render_to_response(self.template_name, self.get_context_data(),
@@ -161,8 +162,8 @@ class TeamCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        # TODO Error message with redirect
         if not isinstance(request.user, Student):
+            messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
             return HttpResponseRedirect('/index')
 
         team_create_form = TeamCreateForm(request.POST)
@@ -170,8 +171,6 @@ class TeamCreateFormView(FormView):
             team = Team()
             team.name = team_create_form.cleaned_data.get('name')
             team.first_teammate = request.user
-
-            # TODO  Try/catch needed?
             team.save()
 
             return HttpResponseRedirect('/teams')
@@ -214,8 +213,8 @@ class ProjectCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        # TODO Error message with redirect
         if not isinstance(request.user, Teacher):
+            messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
             return HttpResponseRedirect('/index')
 
         return render_to_response(self.template_name, self.get_context_data(),
@@ -225,9 +224,8 @@ class ProjectCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        # TODO Error message with redirect
         if not isinstance(request.user, Teacher):
-            # messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
+            messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
             return HttpResponseRedirect('/index')
 
         project_create_form = ProjectCreateForm(request.POST)
@@ -237,8 +235,6 @@ class ProjectCreateFormView(FormView):
             project.description = project_create_form.cleaned_data.get('description')
             project.status = Project.PROJECT_STATUS_OPEN
             project.author = request.user
-
-            # TODO: Try/catch needed?
             project.save()
 
             return HttpResponseRedirect('/projects')
