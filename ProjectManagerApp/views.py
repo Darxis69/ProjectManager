@@ -154,7 +154,7 @@ class TeamCreateFormView(FormView):
 
         if not isinstance(request.user, Student):
             messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect('/teams/')
 
         return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
@@ -165,7 +165,7 @@ class TeamCreateFormView(FormView):
 
         if not isinstance(request.user, Student):
             messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect('/teams/')
 
         team_create_form = TeamCreateForm(request.POST)
         if team_create_form.is_valid():
@@ -241,7 +241,7 @@ class ProjectCreateFormView(FormView):
 
         if not isinstance(request.user, Teacher):
             messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect('/projects/')
 
         return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
@@ -252,7 +252,7 @@ class ProjectCreateFormView(FormView):
 
         if not isinstance(request.user, Teacher):
             messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect('/projects/')
 
         project_create_form = ProjectCreateForm(request.POST)
         if project_create_form.is_valid():
