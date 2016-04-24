@@ -8,10 +8,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 
-from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam
+from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, ProjectHasAssignedTeam
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm
 from ProjectManagerApp.models import Project, Teacher, Student, Team
-from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave
+from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, user_create_project
 
 
 class AccountCreateFormView(FormView):
@@ -247,10 +247,6 @@ class ProjectCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        if not isinstance(request.user, Teacher):
-            messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
-            return HttpResponseRedirect('/projects/')
-
         return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
 
@@ -258,19 +254,15 @@ class ProjectCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        if not isinstance(request.user, Teacher):
-            messages.add_message(request, messages.ERROR, 'Access denied. Students cannot create a new project.')
-            return HttpResponseRedirect('/projects/')
-
         project_create_form = ProjectCreateForm(request.POST)
         if project_create_form.is_valid():
-            project = Project()
-            project.name = project_create_form.cleaned_data.get('name')
-            project.description = project_create_form.cleaned_data.get('description')
-            project.status = Project.PROJECT_STATUS_OPEN
-            project.author = request.user
-            project.save()
+            try:
+                user_create_project(request.user, project_create_form.cleaned_data.get('name'), project_create_form.cleaned_data.get('description'))
+            except MustBeTeacher:
+                messages.add_message(request, messages.ERROR, 'Only teachers are allowed to create projects.')
+                return HttpResponseRedirect('/projects/')
 
+            messages.add_message(request, messages.SUCCESS, 'Project created.')
             return HttpResponseRedirect('/projects')
 
         return render_to_response(self.template_name, self.create_context_data(project_create_form),
@@ -282,21 +274,20 @@ def project_delete(request):
     if not request.user.is_authenticated():
         return HttpResponseRedirect('/account/login')
 
-    if not isinstance(request.user, Teacher):
-        messages.add_message(request, messages.ERROR, 'You are not authorized to delete a project.')
+    try:
+        project = Project.objects.get(pk=request.POST.get('project_id'))
+    except (KeyError, Project.DoesNotExist):
+        messages.add_message(request, messages.ERROR, 'Invalid project.')
         return HttpResponseRedirect('/projects')
 
     try:
-        project = Project.objects.get(pk=request.POST.get('project_id'))
-    except KeyError:
-        messages.add_message(request, messages.ERROR, 'Invalid project Id.')
+        user_delete_project(request.user, project)
+    except MustBeTeacher:
+        messages.add_message(request, messages.ERROR, 'Only teachers are allowed to delete projects.')
         return HttpResponseRedirect('/projects')
-
-    if project.assigned_team:
-        messages.add_message(request, messages.ERROR, 'Cannot delete a project that has an assigned team.')
+    except ProjectHasAssignedTeam:
+        messages.add_message(request, messages.ERROR, 'You cannot delete a project that has an assigned team.')
         return HttpResponseRedirect('/projects')
-
-    project.delete()
 
     messages.add_message(request, messages.SUCCESS, 'Project deleted.')
     return HttpResponseRedirect('/projects')

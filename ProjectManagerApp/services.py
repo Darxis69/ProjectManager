@@ -1,5 +1,5 @@
-from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam
-from ProjectManagerApp.models import Student, Team
+from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, ProjectHasAssignedTeam
+from ProjectManagerApp.models import Student, Team, Teacher, Project
 
 
 def user_join_team(user, team):
@@ -32,6 +32,8 @@ def user_create_team(user, team_name):
 
     user_join_team(user, team)
 
+    return team
+
 
 def user_team_leave(user):
     if not isinstance(user, Student):
@@ -57,5 +59,28 @@ def user_team_leave(user):
     user.save()
 
 
+def user_delete_project(user, project):
+    if not isinstance(user, Teacher):
+        raise MustBeTeacher
 
+    if project.assigned_team:
+        raise ProjectHasAssignedTeam
+
+    project.delete()
+
+
+def user_create_project(user, project_name, project_description):
+    if not isinstance(user, Teacher):
+        raise MustBeTeacher
+
+    project = Project()
+    project.name = project_name
+    project.description = project_description
+    project.status = Project.PROJECT_STATUS_OPEN
+    project.assigned_team = None
+    project.author = user
+
+    project.save()
+
+    return project
 

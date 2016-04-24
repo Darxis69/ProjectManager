@@ -8,3 +8,12 @@ class UserNotInTeam(Exception):
 
 class MustBeStudent(Exception):
     pass
+
+
+class MustBeTeacher(Exception):
+    pass
+
+
+class ProjectHasAssignedTeam(Exception):
+    pass
+
