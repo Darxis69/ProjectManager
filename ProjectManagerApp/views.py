@@ -1,9 +1,11 @@
 from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import FormView
 from django.views.generic import TemplateView
@@ -100,6 +102,7 @@ class LoginFormView(FormView):
                                   context_instance=RequestContext(request))
 
 
+@method_decorator(login_required, name='dispatch')
 class IndexView(TemplateView):
     template_name = 'index.html'
 
@@ -108,18 +111,16 @@ class IndexView(TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            return render_to_response(self.template_name, self.get_context_data(),
-                                      context_instance=RequestContext(request))
-
-        return HttpResponseRedirect('/account/login')
+        return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
 
+@login_required
 def logout(request):
     auth_logout(request)
     return HttpResponseRedirect('/account/login')
 
 
+@method_decorator(login_required, name='dispatch')
 class TeamListView(TemplateView):
     template_name = 'team/list.html'
 
@@ -129,14 +130,11 @@ class TeamListView(TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            teams = Team.objects.all()
-            return render_to_response(self.template_name, self.get_context_data(teams),
-                                      context_instance=RequestContext(request))
-
-        return HttpResponseRedirect('/account/login')
+        teams = Team.objects.all()
+        return render_to_response(self.template_name, self.get_context_data(teams), context_instance=RequestContext(request))
 
 
+@method_decorator(login_required, name='dispatch')
 class TeamCreateFormView(FormView):
     template_name = 'team/create.html'
     form_class = TeamCreateForm
@@ -151,16 +149,9 @@ class TeamCreateFormView(FormView):
         return context
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            return HttpResponseRedirect('/account/login')
-
-        return render_to_response(self.template_name, self.get_context_data(),
-                                  context_instance=RequestContext(request))
+        return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            return HttpResponseRedirect('/account/login')
-
         team_create_form = TeamCreateForm(request.POST)
         if team_create_form.is_valid():
             try:
@@ -180,6 +171,7 @@ class TeamCreateFormView(FormView):
                                   context_instance=RequestContext(request))
 
 
+@login_required
 def team_join(request):
     try:
         team = Team.objects.get(id=request.POST.get('team_id'))
@@ -199,6 +191,7 @@ def team_join(request):
     return HttpResponseRedirect('/teams')
 
 
+@login_required
 def team_leave(request):
     try:
         user_team_leave(request.user)
@@ -213,6 +206,7 @@ def team_leave(request):
     return HttpResponseRedirect('/teams')
 
 
+@method_decorator(login_required, name='dispatch')
 class ProjectListView(TemplateView):
     template_name = 'project/list.html'
 
@@ -222,14 +216,11 @@ class ProjectListView(TemplateView):
         return context
 
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated():
-            projects = Project.objects.all()
-            return render_to_response(self.template_name, self.get_context_data(projects),
-                                      context_instance=RequestContext(request))
-
-        return HttpResponseRedirect('/account/login')
+        projects = Project.objects.all()
+        return render_to_response(self.template_name, self.get_context_data(projects), context_instance=RequestContext(request))
 
 
+@method_decorator(login_required, name='dispatch')
 class ProjectCreateFormView(FormView):
     template_name = 'project/create.html'
     form_class = ProjectCreateForm
@@ -244,16 +235,9 @@ class ProjectCreateFormView(FormView):
         return context
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            return HttpResponseRedirect('/account/login')
-
-        return render_to_response(self.template_name, self.get_context_data(),
-                                  context_instance=RequestContext(request))
+        return render_to_response(self.template_name, self.get_context_data(), context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
-        if not request.user.is_authenticated():
-            return HttpResponseRedirect('/account/login')
-
         project_create_form = ProjectCreateForm(request.POST)
         if project_create_form.is_valid():
             try:
@@ -265,15 +249,12 @@ class ProjectCreateFormView(FormView):
             messages.add_message(request, messages.SUCCESS, 'Project created.')
             return HttpResponseRedirect('/projects')
 
-        return render_to_response(self.template_name, self.create_context_data(project_create_form),
-                                  context_instance=RequestContext(request))
+        return render_to_response(self.template_name, self.create_context_data(project_create_form), context_instance=RequestContext(request))
 
 
 @require_http_methods(["POST"])
+@login_required
 def project_delete(request):
-    if not request.user.is_authenticated():
-        return HttpResponseRedirect('/account/login')
-
     try:
         project = Project.objects.get(pk=request.POST.get('project_id'))
     except (KeyError, Project.DoesNotExist):

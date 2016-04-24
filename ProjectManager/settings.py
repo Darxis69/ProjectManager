@@ -140,6 +140,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+LOGIN_URL = '/account/login/'
+
 # Messages configuration
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
