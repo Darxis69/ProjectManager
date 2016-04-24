@@ -88,6 +88,7 @@ DATABASES = {
         'PASSWORD': 'qweasd123!@#',
         'HOST': '127.0.0.1',
         'PORT': '',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
