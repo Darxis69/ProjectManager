@@ -8,8 +8,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 
+from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm
 from ProjectManagerApp.models import Project, Teacher, Student, Team
+from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave
 
 
 class AccountCreateFormView(FormView):
@@ -152,14 +154,6 @@ class TeamCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        if not isinstance(request.user, Student):
-            messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
-            return HttpResponseRedirect('/teams/')
-
-        if request.user.team:
-            messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
-            return HttpResponseRedirect('/teams/')
-
         return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
 
@@ -167,24 +161,19 @@ class TeamCreateFormView(FormView):
         if not request.user.is_authenticated():
             return HttpResponseRedirect('/account/login')
 
-        if not isinstance(request.user, Student):
-            messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
-            return HttpResponseRedirect('/teams/')
-
-        if request.user.team:
-            messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
-            return HttpResponseRedirect('/teams/')
-
         team_create_form = TeamCreateForm(request.POST)
         if team_create_form.is_valid():
-            team = Team()
-            team.name = team_create_form.cleaned_data.get('name')
-            team.first_teammate = request.user
-            team.save()
+            try:
+                user_create_team(request.user, team_create_form.cleaned_data.get('name'))
+            except MustBeStudent:
+                messages.add_message(request, messages.ERROR, 'Only students are allowed to create a team.')
+                return render_to_response(self.template_name, self.create_context_data(team_create_form), context_instance=RequestContext(request))
 
-            request.user.team = team
-            request.user.save()
+            except UserAlreadyInTeam:
+                messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+                return render_to_response(self.template_name, self.create_context_data(team_create_form), context_instance=RequestContext(request))
 
+            messages.add_message(request, messages.SUCCESS, 'Team created.')
             return HttpResponseRedirect('/teams')
 
         return render_to_response(self.template_name, self.create_context_data(team_create_form),
@@ -192,35 +181,35 @@ class TeamCreateFormView(FormView):
 
 
 def team_join(request):
-    if request.user.team:
-        messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+    try:
+        team = Team.objects.get(id=request.POST.get('team_id'))
+    except (KeyError, Team.DoesNotExist):
+        messages.add_message(request, messages.ERROR, 'Invalid team.')
         return HttpResponseRedirect('/teams/')
 
-    team = Team.objects.get(id=request.POST.get('team_id'))
-    if team.first_teammate is None:
-        team.first_teammate = request.user
-    elif team.second_teammate is None:
-        team.second_teammate = request.user
-    team.save(force_update=True)
-
-    request.user.team = team
-    request.user.save()
+    try:
+        user_join_team(request.user, team)
+    except MustBeStudent:
+        messages.add_message(request, messages.ERROR, 'Only students are allowed to join a team.')
+        return HttpResponseRedirect('/teams/')
+    except UserAlreadyInTeam:
+        messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+        return HttpResponseRedirect('/teams/')
 
     return HttpResponseRedirect('/teams')
 
 
 def team_leave(request):
-    team = Team.objects.get(id=request.POST.get('team_id'))
-    if team.first_teammate == request.user:
-        team.first_teammate = None
-    elif team.second_teammate == request.user:
-        team.second_teammate = None
-    team.save(force_update=True)
+    try:
+        user_team_leave(request.user)
+    except MustBeStudent:
+        messages.add_message(request, messages.ERROR, 'You must be a student to quit a team.')
+        return HttpResponseRedirect('/teams/')
+    except UserNotInTeam:
+        messages.add_message(request, messages.ERROR, 'You must be in a team in order to quit it.')
+        return HttpResponseRedirect('/teams/')
 
-    if team.first_teammate is None and team.second_teammate is None:
-        # TODO exception checking
-        team.delete()
-        messages.add_message(request, messages.INFO, 'Team was deleted.')
+    messages.add_message(request, messages.INFO, 'You left the team.')
     return HttpResponseRedirect('/teams')
 
 
@@ -298,7 +287,7 @@ def project_delete(request):
         return HttpResponseRedirect('/projects')
 
     try:
-        project = Project.objects.get(pk=request.POST['project_id'])
+        project = Project.objects.get(pk=request.POST.get('project_id'))
     except KeyError:
         messages.add_message(request, messages.ERROR, 'Invalid project Id.')
         return HttpResponseRedirect('/projects')

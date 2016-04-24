@@ -12,7 +12,7 @@ class Teacher(UserBase):
 
 class Student(UserBase):
     student_no = models.IntegerField()
-    team = models.OneToOneField('Team', null=True, related_name='+', on_delete=models.SET_NULL)
+    team = models.ForeignKey('Team', null=True, related_name='+', on_delete=models.SET_NULL, unique=False)
 
 
 class Team(models.Model):
