@@ -4,7 +4,7 @@ from ProjectManagerApp.views import LoginFormView, AccountCreateFormView, Projec
     TeamCreateFormView, TeamListView, ProjectListView
 from . import views
 
-urlpatterns = {
+urlpatterns = [
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^index/$', IndexView.as_view(), name='index'),
     url(r'^account/login/$', LoginFormView.as_view(), name='login'),
@@ -17,4 +17,4 @@ urlpatterns = {
     url(r'^teams/create/$', TeamCreateFormView.as_view(), name="team_create"),
     url(r'^teams/join/$', views.team_join, name="team_join"),
     url(r'^teams/leave/$', views.team_leave, name="team_leave")
-}
+]
