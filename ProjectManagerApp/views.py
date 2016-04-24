@@ -271,6 +271,9 @@ class ProjectCreateFormView(FormView):
 
 @require_http_methods(["POST"])
 def project_delete(request):
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect('/account/login')
+
     if not isinstance(request.user, Teacher):
         messages.add_message(request, messages.ERROR, 'You are not authorized to delete a project.')
         return HttpResponseRedirect('/projects')
