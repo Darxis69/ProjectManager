@@ -12,12 +12,13 @@ class Teacher(UserBase):
 
 class Student(UserBase):
     student_no = models.IntegerField()
+    team = models.OneToOneField('Team', null=True, related_name='+', on_delete=models.SET_NULL)
 
 
 class Team(models.Model):
     name = models.CharField(max_length=50)
-    first_teammate = models.ForeignKey(Student, null=True, related_name="first_student", on_delete=models.SET_NULL)
-    second_teammate = models.ForeignKey(Student, null=True, related_name="second_student", on_delete=models.SET_NULL)
+    first_teammate = models.OneToOneField(Student, null=True, related_name='+', on_delete=models.SET_NULL, unique=True)
+    second_teammate = models.OneToOneField(Student, null=True, related_name='+', on_delete=models.SET_NULL, unique=True)
 
 
 class Project(models.Model):

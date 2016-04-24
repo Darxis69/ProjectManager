@@ -156,6 +156,10 @@ class TeamCreateFormView(FormView):
             messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
             return HttpResponseRedirect('/teams/')
 
+        if request.user.team:
+            messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+            return HttpResponseRedirect('/teams/')
+
         return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
 
@@ -167,12 +171,19 @@ class TeamCreateFormView(FormView):
             messages.add_message(request, messages.ERROR, 'Access denied. Teachers cannot create a new team.')
             return HttpResponseRedirect('/teams/')
 
+        if request.user.team:
+            messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+            return HttpResponseRedirect('/teams/')
+
         team_create_form = TeamCreateForm(request.POST)
         if team_create_form.is_valid():
             team = Team()
             team.name = team_create_form.cleaned_data.get('name')
             team.first_teammate = request.user
             team.save()
+
+            request.user.team = team
+            request.user.save()
 
             return HttpResponseRedirect('/teams')
 
@@ -181,12 +192,20 @@ class TeamCreateFormView(FormView):
 
 
 def team_join(request):
+    if request.user.team:
+        messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+        return HttpResponseRedirect('/teams/')
+
     team = Team.objects.get(id=request.POST.get('team_id'))
     if team.first_teammate is None:
         team.first_teammate = request.user
     elif team.second_teammate is None:
         team.second_teammate = request.user
     team.save(force_update=True)
+
+    request.user.team = team
+    request.user.save()
+
     return HttpResponseRedirect('/teams')
 
 
