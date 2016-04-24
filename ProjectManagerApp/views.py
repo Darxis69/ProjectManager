@@ -1,6 +1,7 @@
 from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
@@ -31,14 +32,14 @@ class AccountCreateFormView(FormView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect(reverse('index_url'))
 
         return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect(reverse('index_url'))
 
         account_create_form = AccountCreateForm(request.POST)
         if account_create_form.is_valid():
@@ -62,7 +63,7 @@ class AccountCreateFormView(FormView):
                                           context_instance=RequestContext(request))
 
             messages.add_message(request, messages.SUCCESS, 'Account created.')
-            return HttpResponseRedirect('/account/login')
+            return HttpResponseRedirect(reverse('account_login_url'))
 
         return render_to_response(self.template_name, self.create_context_data(account_create_form),
                                   context_instance=RequestContext(request))
@@ -79,14 +80,14 @@ class LoginFormView(FormView):
 
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect(reverse('index_url'))
 
         return render_to_response(self.template_name, self.get_context_data(),
                                   context_instance=RequestContext(request))
 
     def post(self, request, *args, **kwargs):
         if request.user.is_authenticated():
-            return HttpResponseRedirect('/index')
+            return HttpResponseRedirect(reverse('index_url'))
 
         if self.request.POST:
             username = self.request.POST['username']
@@ -99,7 +100,7 @@ class LoginFormView(FormView):
                 if self.request.GET.get('next'):
                     return HttpResponseRedirect(self.request.GET.get('next'))
 
-                return HttpResponseRedirect('/index')
+                return HttpResponseRedirect(reverse('index_url'))
 
         messages.add_message(request, messages.ERROR, 'Username or password is incorrect. Try again.')
         return render_to_response(self.template_name, self.get_context_data(),
@@ -121,7 +122,7 @@ class IndexView(TemplateView):
 @login_required
 def logout(request):
     auth_logout(request)
-    return HttpResponseRedirect('/account/login')
+    return HttpResponseRedirect(reverse('account_login_url'))
 
 
 @method_decorator(login_required, name='dispatch')
@@ -169,7 +170,7 @@ class TeamCreateFormView(FormView):
                 return render_to_response(self.template_name, self.create_context_data(team_create_form), context_instance=RequestContext(request))
 
             messages.add_message(request, messages.SUCCESS, 'Team created.')
-            return HttpResponseRedirect('/teams')
+            return HttpResponseRedirect(reverse('teams_list_url'))
 
         return render_to_response(self.template_name, self.create_context_data(team_create_form),
                                   context_instance=RequestContext(request))
@@ -181,18 +182,18 @@ def team_join(request):
         team = Team.objects.get(id=request.POST.get('team_id'))
     except (KeyError, Team.DoesNotExist):
         messages.add_message(request, messages.ERROR, 'Invalid team.')
-        return HttpResponseRedirect('/teams/')
+        return HttpResponseRedirect(reverse('teams_list_url'))
 
     try:
         user_join_team(request.user, team)
     except MustBeStudent:
         messages.add_message(request, messages.ERROR, 'Only students are allowed to join a team.')
-        return HttpResponseRedirect('/teams/')
+        return HttpResponseRedirect(reverse('teams_list_url'))
     except UserAlreadyInTeam:
         messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
-        return HttpResponseRedirect('/teams/')
+        return HttpResponseRedirect(reverse('teams_list_url'))
 
-    return HttpResponseRedirect('/teams')
+    return HttpResponseRedirect(reverse('teams_list_url'))
 
 
 @login_required
@@ -201,13 +202,13 @@ def team_leave(request):
         user_team_leave(request.user)
     except MustBeStudent:
         messages.add_message(request, messages.ERROR, 'You must be a student to quit a team.')
-        return HttpResponseRedirect('/teams/')
+        return HttpResponseRedirect(reverse('teams_list_url'))
     except UserNotInTeam:
         messages.add_message(request, messages.ERROR, 'You must be in a team in order to quit it.')
-        return HttpResponseRedirect('/teams/')
+        return HttpResponseRedirect(reverse('teams_list_url'))
 
     messages.add_message(request, messages.INFO, 'You left the team.')
-    return HttpResponseRedirect('/teams')
+    return HttpResponseRedirect(reverse('teams_list_url'))
 
 
 @method_decorator(login_required, name='dispatch')
@@ -248,10 +249,10 @@ class ProjectCreateFormView(FormView):
                 user_create_project(request.user, project_create_form.cleaned_data.get('name'), project_create_form.cleaned_data.get('description'))
             except MustBeTeacher:
                 messages.add_message(request, messages.ERROR, 'Only teachers are allowed to create projects.')
-                return HttpResponseRedirect('/projects/')
+                return HttpResponseRedirect(reverse('projects_list_url'))
 
             messages.add_message(request, messages.SUCCESS, 'Project created.')
-            return HttpResponseRedirect('/projects')
+            return HttpResponseRedirect(reverse('projects_list_url'))
 
         return render_to_response(self.template_name, self.create_context_data(project_create_form), context_instance=RequestContext(request))
 
@@ -263,16 +264,16 @@ def project_delete(request):
         project = Project.objects.get(pk=request.POST.get('project_id'))
     except (KeyError, Project.DoesNotExist):
         messages.add_message(request, messages.ERROR, 'Invalid project.')
-        return HttpResponseRedirect('/projects')
+        return HttpResponseRedirect(reverse('projects_list_url'))
 
     try:
         user_delete_project(request.user, project)
     except MustBeTeacher:
         messages.add_message(request, messages.ERROR, 'Only teachers are allowed to delete projects.')
-        return HttpResponseRedirect('/projects')
+        return HttpResponseRedirect(reverse('projects_list_url'))
     except ProjectHasAssignedTeam:
         messages.add_message(request, messages.ERROR, 'You cannot delete a project that has an assigned team.')
-        return HttpResponseRedirect('/projects')
+        return HttpResponseRedirect(reverse('projects_list_url'))
 
     messages.add_message(request, messages.SUCCESS, 'Project deleted.')
-    return HttpResponseRedirect('/projects')
+    return HttpResponseRedirect(reverse('projects_list_url'))
