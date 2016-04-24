@@ -8,13 +8,41 @@
             </div>
             <div class="panel-body">
                 {% if projects %}
-                    <ul>
-                        {% for project in projects %}
-                            <li>
-                                <a href="/index">{{ project.name }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                    <div class="table">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Project name</th>
+                                    <th>Assigned team</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for project in projects %}
+                                <tr>
+                                    <td>{{ project.name }}</td>
+                                    <td>
+                                        {% if project.assigned_team %}
+                                            <a href="/teams/">{{  project.assigned_team.name }}</a>
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </td>
+                                    <td align="center">
+                                        {% if is_teacher %}
+                                            <form method="post" action="/projects/delete/">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-xs btn-danger " name="project_id" value="{{ project.id }}">
+                                                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 {% else %}
                     <p>No projects found.</p>
                 {% endif %}

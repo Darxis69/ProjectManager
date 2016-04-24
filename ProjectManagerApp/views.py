@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
+from django.views.decorators.http import require_http_methods
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 
@@ -267,3 +268,24 @@ class ProjectCreateFormView(FormView):
         return render_to_response(self.template_name, self.create_context_data(project_create_form),
                                   context_instance=RequestContext(request))
 
+
+@require_http_methods(["POST"])
+def project_delete(request):
+    if not isinstance(request.user, Teacher):
+        messages.add_message(request, messages.ERROR, 'You are not authorized to delete a project.')
+        return HttpResponseRedirect('/projects')
+
+    try:
+        project = Project.objects.get(pk=request.POST['project_id'])
+    except KeyError:
+        messages.add_message(request, messages.ERROR, 'Invalid project Id.')
+        return HttpResponseRedirect('/projects')
+
+    if project.assigned_team:
+        messages.add_message(request, messages.ERROR, 'Cannot delete a project that has an assigned team.')
+        return HttpResponseRedirect('/projects')
+
+    project.delete()
+
+    messages.add_message(request, messages.SUCCESS, 'Project deleted.')
+    return HttpResponseRedirect('/projects')

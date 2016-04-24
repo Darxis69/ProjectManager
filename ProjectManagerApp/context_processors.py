@@ -1,8 +1,12 @@
-from ProjectManagerApp.models import Student  # , Team, Project
+from ProjectManagerApp.models import Student, Teacher  # , Team, Project
 
 
 def is_student(request):
     return {'is_student': isinstance(request.user, Student)}
+
+
+def is_teacher(request):
+    return {'is_teacher': isinstance(request.user, Teacher)}
 
 
 # def teams():
