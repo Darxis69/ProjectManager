@@ -8,7 +8,7 @@
                 <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="/account/resetPassword">Forgot password?</a></div>
             </div>
             <div class="panel-body">
-                <form action="/account/login/" method="POST" class="form">
+                <form action="{{ request.get_full_path }}" method="POST" class="form">
                     {% csrf_token %}
                     {% bootstrap_form login_form %}
                     {% buttons %}

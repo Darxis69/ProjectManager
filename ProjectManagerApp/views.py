@@ -95,6 +95,10 @@ class LoginFormView(FormView):
             user = auth_authenticate(username=username, password=password)
             if user is not None:
                 auth_login(request, user)
+
+                if self.request.GET.get('next'):
+                    return HttpResponseRedirect(self.request.GET.get('next'))
+
                 return HttpResponseRedirect('/index')
 
         messages.add_message(request, messages.ERROR, 'Username or password is incorrect. Try again.')
