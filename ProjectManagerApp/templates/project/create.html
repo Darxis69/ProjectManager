@@ -7,7 +7,7 @@
                 <div class="panel-title">Create project</div>
             </div>
             <div class="panel-body">
-                <form action="/projects/create/" method="POST" class="form">
+                <form action="{% url project_create_url %}" method="POST" class="form">
                     {% csrf_token %}
                     {% bootstrap_form project_create_form %}
                     {% buttons %}

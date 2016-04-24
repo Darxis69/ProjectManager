@@ -24,30 +24,30 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a href="/index" class="navbar-brand">Project manager</a>
+            <a href="{% url 'index_url' %}" class="navbar-brand">Project manager</a>
         </div>
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="nav navbar-nav">
                 {% if user.is_authenticated %}
-                    <li class="active"><a href="/index">Home</a></li>
+                    <li class="active"><a href="{% url 'index_url' %}">Home</a></li>
                     <li class="dropdown">
-                        <a href="/projects" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Projects<span class="caret"></span></a>
+                        <a href="{% url 'project_list_url' %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Projects<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             {% if not is_student  %}
-                                <li><a href="/projects/create">Create</a></li>
+                                <li><a href="{% url 'project_create_url' %}">Create</a></li>
                                 <li role="separator" class="divider"></li>
                             {% endif %}
-                            <li><a href="/projects">List</a></li>
+                            <li><a href="{% url 'project_list_url' %}">List</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
-                        <a href="/teams" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Teams<span class="caret"></span></a>
+                        <a href="{% url 'team_list_url' %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Teams<span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             {% if is_student  %}
-                                <li><a href="/teams/create">Create</a></li>
+                                <li><a href="{% url 'team_create_url' %}">Create</a></li>
                                 <li role="separator" class="divider"></li>
                             {% endif %}
-                            <li><a href="/teams">List</a></li>
+                            <li><a href="{% url 'team_list_url' %}">List</a></li>
                         </ul>
                     </li>
                 {% endif %}
@@ -55,11 +55,13 @@
 
             <ul class="nav navbar-nav navbar-right" role="navigation">
                 {% if not user.is_authenticated  %}
-                    <li><a href="/account/login">Login</a></li>
-                    <li><a href="/account/create">Create account</a></li>
+                    <li><a href="{% url 'account_login_url' %}">Login</a></li>
+                    <li><a href="{% url 'account_create_url' %}">Create account</a></li>
                 {% else %}
-                    <li><a href="/account">My account</a></li>
-                    <li><a href="/account/logout">Logout</a></li>
+                    {% comment %}
+                    <li><a href="{% url 'account' %}">My account</a></li>
+                    {% endcomment %}
+                    <li><a href="{% url 'account_logout_url' %}">Logout</a></li>
                 {% endif %}
             </ul>
         </div>

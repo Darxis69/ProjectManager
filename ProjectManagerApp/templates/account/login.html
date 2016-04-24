@@ -5,7 +5,9 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">Login</div>
-                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="/account/resetPassword">Forgot password?</a></div>
+                {% comment %}
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'account_password_reset_url' %}">Forgot password?</a></div
+                {% endcomment %}
             </div>
             <div class="panel-body">
                 <form action="{{ request.get_full_path }}" method="POST" class="form">
@@ -18,7 +20,7 @@
                 <div class="col-md-12 control">
                     <div style="border-top: 1px solid#888; padding-top: 15px; font-size:86%;">
                         Don't have an account?
-                        <a href="/account/create">Sign Up here!</a>
+                        <a href="{% url 'account_create_url' %}">Sign Up here!</a>
                     </div>
                 </div>
             </div>

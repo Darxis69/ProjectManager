@@ -5,7 +5,7 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">List of all teams</div>
-                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="/teams/create">Create team</a></div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'team_create_url' %}">Create team</a></div>
             </div>
             <div class="panel-body">
                 {% if teams %}
@@ -27,14 +27,14 @@
                                     <td>{{ team.second_teammate }}</td>
                                     <td align="center">
                                         {% if request.user == team.first_teammate or request.user == team.second_teammate %}
-                                            <form method="post" action="/teams/leave/">
+                                            <form method="post" action="{% url 'team_leave_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary" name="team_id" value={{ team.id }}>
                                                     <i class="glyphicon glyphicon-log-out" aria-hidden="true" title="Leave"></i>
                                                 </button>
                                             </form>
                                         {% elif not team.first_teammate or not team.second_teammate %}
-                                            <form method="post" action="/teams/join/">
+                                            <form method="post" action="{% url 'team_join_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary" name="team_id" value={{ team.id }}>
                                                     <i class="glyphicon glyphicon-plus" aria-hidden="true" title="Join"></i>

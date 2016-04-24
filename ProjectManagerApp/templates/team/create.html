@@ -7,7 +7,7 @@
                 <div class="panel-title">Create team</div>
             </div>
             <div class="panel-body">
-                <form action="/teams/create/" method="POST" class="form">
+                <form action="{% url 'team_create_url' %}" method="POST" class="form">
                     {% csrf_token %}
                     {% bootstrap_form team_create_form %}
                     {% buttons %}
