@@ -61,6 +61,7 @@
                     {% comment %}
                     <li><a href="{% url 'account' %}">My account</a></li>
                     {% endcomment %}
+                    <li class="disabled"><a>Logged as {{ request.user }}</a></li>
                     <li><a href="{% url 'account_logout_url' %}">Logout</a></li>
                 {% endif %}
             </ul>
