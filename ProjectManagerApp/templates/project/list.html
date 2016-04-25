@@ -35,8 +35,15 @@
                                         {% if is_teacher %}
                                             <form method="post" action="{% url 'project_delete_url' %}">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-xs btn-danger " name="project_id" value="{{ project.id }}">
+                                                <button type="submit" class="btn btn-danger" name="project_id" value="{{ project.id }}">
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                                                </button>
+                                            </form>
+                                        {% elif is_student %}
+                                            <form method="post" action="{% url 'project_join_url' %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary" name="project_id" value="{{ project.id }}">
+                                                    <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
                                                 </button>
                                             </form>
                                         {% endif %}

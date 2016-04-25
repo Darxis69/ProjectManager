@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^account/create/$', AccountCreateFormView.as_view(), name="account_create_url"),
     url(r'^projects/$', ProjectListView.as_view(), name="projects_list_url"),
     url(r'^projects/create/$', ProjectCreateFormView.as_view(), name="project_create_url"),
+    url(r'^projects/join/$', views.project_join, name="project_join_url"),
     url(r'^projects/delete/$', views.project_delete, name="project_delete_url"),
     url(r'^teams/$', TeamListView.as_view(), name="teams_list_url"),
     url(r'^teams/create/$', TeamCreateFormView.as_view(), name="team_create_url"),
