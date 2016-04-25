@@ -7,11 +7,12 @@
                 <div class="panel-title">Create project</div>
             </div>
             <div class="panel-body">
-                <form action="{% url project_create_url %}" method="POST" class="form">
+                <form action="{% url 'project_create_url' %}" method="POST" class="form">
                     {% csrf_token %}
                     {% bootstrap_form project_create_form %}
                     {% buttons %}
-                        {% bootstrap_button "Create" button_type="submit" button_class="btn btn-primary" %}
+                        <a href="{% url 'projects_list_url' %}">{% bootstrap_button "Cancel" button_type="button" button_class="btn btn-default" %}</a>
+                        {% bootstrap_button "Create" button_type="submit" button_class="btn btn-primary pull-right" %}
                     {% endbuttons %}
                 </form>
             </div>

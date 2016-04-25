@@ -11,7 +11,8 @@
                     {% csrf_token %}
                     {% bootstrap_form team_create_form %}
                     {% buttons %}
-                        {% bootstrap_button "Create" button_type="submit" button_class="btn btn-primary" %}
+                        <a href="{% url 'teams_list_url' %}">{% bootstrap_button "Cancel" button_type="button" button_class="btn btn-default" %}</a>
+                        {% bootstrap_button "Create" button_type="submit" button_class="btn btn-primary pull-right" %}
                     {% endbuttons %}
                 </form>
             </div>
