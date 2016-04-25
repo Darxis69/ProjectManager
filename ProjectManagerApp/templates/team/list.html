@@ -5,7 +5,9 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">List of all teams</div>
+                {% if is_student %}
                 <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'team_create_url' %}">Create team</a></div>
+                {% endif %}
             </div>
             <div class="panel-body">
                 {% if teams %}
@@ -16,7 +18,9 @@
                                     <th>Team name</th>
                                     <th>First student</th>
                                     <th>Second student</th>
+                                    {% if is_student %}
                                     <th>Actions</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
@@ -25,6 +29,7 @@
                                     <td>{{ team.name }}</td>
                                     <td>{{ team.first_teammate }}</td>
                                     <td>{{ team.second_teammate }}</td>
+                                    {% if is_student %}
                                     <td align="center">
                                         {% if request.user == team.first_teammate or request.user == team.second_teammate %}
                                             <form method="post" action="{% url 'team_leave_url' %}">
@@ -42,6 +47,7 @@
                                             </form>
                                         {% endif %}
                                     </td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                             </tbody>

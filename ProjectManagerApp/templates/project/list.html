@@ -5,6 +5,9 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">List of all projects</div>
+                {% if is_teacher %}
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'project_create_url' %}">Create project</a></div>
+                {% endif %}
             </div>
             <div class="panel-body">
                 {% if projects %}

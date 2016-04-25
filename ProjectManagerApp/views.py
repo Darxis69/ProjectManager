@@ -275,5 +275,5 @@ def project_delete(request):
         messages.add_message(request, messages.ERROR, 'You cannot delete a project that has an assigned team.')
         return HttpResponseRedirect(reverse('projects_list_url'))
 
-    messages.add_message(request, messages.SUCCESS, 'Project deleted.')
+    messages.add_message(request, messages.INFO, 'Project deleted.')
     return HttpResponseRedirect(reverse('projects_list_url'))
