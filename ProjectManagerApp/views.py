@@ -202,7 +202,6 @@ def team_join(request):
     return HttpResponseRedirect(reverse('teams_list_url'))
 
 
-@require_http_methods(["POST"])
 @login_required
 def team_leave(request):
     try:

@@ -9,6 +9,11 @@ def is_teacher(request):
     return {'is_teacher': isinstance(request.user, Teacher)}
 
 
+def user_has_team(request):
+
+    return {'user_has_team': request.user.team is not None}
+
+
 # def teams():
 #    return {'teams': Team.objects.all()}
 

@@ -69,7 +69,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'ProjectManagerApp.context_processors.is_student',
-                'ProjectManagerApp.context_processors.is_teacher'
+                'ProjectManagerApp.context_processors.is_teacher',
+                'ProjectManagerApp.context_processors.user_has_team'
             ],
         },
     },
