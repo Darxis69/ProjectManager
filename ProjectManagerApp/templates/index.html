@@ -1,9 +1,58 @@
 {% extends "layout.html" %}
 {% load bootstrap3 %}
 {% block content %}
-    <div class="col-md-6 col-md-offset-3">
-        <span>
-            Hello World!
-        </span>
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+            <div class="panel panel-primary">
+                <div class="panel-heading">Home</div>
+                <div class="panel-body">
+                    <p>Some simple description of this panel.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">Projects <span class="badge">50</span></a>
+                    <a href="{% url 'teams_list_url' %}" class="list-group-item">Teams <span class="badge">50</span></a>
+                </div>
+            </div>
     </div>
+    <div class="col-md-5">
+            <div class="panel panel-danger">
+                <div class="panel-heading">Account</div>
+                <div class="panel-body">
+                    <p>Some simple description of this panel.</p>
+                </div>
+                <div class="list-group">
+                    <a href="#" class="list-group-item">View account</a>
+                    <a href="#" class="list-group-item">Settings</a>
+                </div>
+            </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-5 col-md-offset-1">
+            <div class="panel panel-success">
+                <div class="panel-heading">Projects</div>
+                <div class="panel-body">
+                    <p>Some simple description of this panel.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'project_create_url' %}" class="list-group-item">Create a new project</a>
+                    <a href="#" class="list-group-item">Some other option</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">View all projects</a>
+                </div>
+            </div>
+    </div>
+    <div class="col-md-5">
+            <div class="panel panel-info">
+                <div class="panel-heading">Teams</div>
+                <div class="panel-body">
+                    <p>Some simple description of this panel.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'team_create_url' %}" class="list-group-item">Create a new team</a>
+                    <a href="#" class="list-group-item">Some other option</a>
+                    <a href="{% url 'teams_list_url' %}" class="list-group-item">View all teams</a>
+                </div>
+            </div>
+    </div>
+</div>
 {% endblock %}
