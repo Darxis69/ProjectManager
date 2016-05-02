@@ -10,8 +10,7 @@ def is_teacher(request):
 
 
 def user_has_team(request):
-
-    return {'user_has_team': request.user.team is not None}
+    return {'user_has_team': isinstance(request.user, Student) and request.user.team is not None}
 
 
 # def teams():
