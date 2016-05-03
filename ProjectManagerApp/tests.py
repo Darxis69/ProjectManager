@@ -3,11 +3,22 @@ from .models import User, Student, Teacher, Team, Project
 from .services import *
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
+from .forms import AccountCreateForm
 
 # Create your tests here.
 
 
 class ManageTeamsTests(TestCase):
+
+    def test_create_team(self):
+        user = Student(username='test_username', email='test@mail.com', student_no="1234")
+        user.save()
+
+        user_create_team(user, "test_team")
+
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+        team = Team.objects.get(name="test_team")
+        self.assertEqual(team.first_teammate, user)
 
     def test_create_team_as_teacher(self):
         user = Teacher()
@@ -94,6 +105,19 @@ class ManageProjectsTests(TestCase):
         self.assertEqual(project.status, Project.PROJECT_STATUS_OPEN)
         self.assertEqual(project.assigned_team, None)
         self.assertEqual(project.author, user)
+        self.assertTrue(Project.objects.filter(name=self.project_name).exists())
+
+    def test_delete_project(self):
+        user = Teacher()
+        user.save()
+        project = user_create_project(user, self.project_name, self.project_descripton)
+        project.save()
+
+        self.assertTrue(Project.objects.filter(name=self.project_name).exists())
+
+        user_delete_project(user, project)
+
+        self.assertFalse(Project.objects.filter(name=self.project_name).exists())
 
 
 class ViewsTests(TestCase):
@@ -111,9 +135,44 @@ class ViewsTests(TestCase):
         response = self.client.get('/teams/')
         self.assertRedirects(response, '/account/login/?next=/teams/')
 
-    # def test_login(self):
-    #     response = self.client.post('/account/login/', {'username': 'test', 'password': 'test_pass'})
-    #     self.assertEqual(response.status_code, 200)
+    def test_student_account_create_from_view(self):
+        response = self.client.get('/account/create/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/create/',{ 'username': 'test_stud_username',
+                                                         'email': 'test@mail.com',
+                                                         'password': "test_pass",
+                                                         'password_repeat': "test_pass",
+                                                         'account_type': "1",
+                                                         'student_no': "1234"})
+
+        self.assertRedirects(response, '/account/login/')
+
+        self.assertTrue(Student.objects.filter(username='test_stud_username', email='test@mail.com').exists())
+
+    def test_teacher_account_create_from_view(self):
+        response = self.client.get('/account/create/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/create/',{ 'username': 'test__teacher_username',
+                                                         'email': 'test@mail.com',
+                                                         'password': "test_pass",
+                                                         'password_repeat': "test_pass",
+                                                         'account_type': "2"})
+
+        self.assertRedirects(response, '/account/login/')
+
+        self.assertTrue(Teacher.objects.filter(username='test__teacher_username', email='test@mail.com').exists())
+
+
+    def test_wrong_login(self):
+        response = self.client.post('/account/login/', {'username': 'test', 'password': 'test_pass'})
+        self.assertEqual(response.status_code, 200)
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Username or password is incorrect. Try again.')
+
 
 class ModelsTests(TestCase):
 
@@ -136,3 +195,35 @@ class ModelsTests(TestCase):
         user.set_password('test_password')
         with self.assertRaises(IntegrityError):
             user.save()
+
+
+class FormsTests(TestCase):
+
+    def test_account_create_form_pass_repeat(self):
+        data = { 'username': 'test_stud_username',
+                 'email': 'test@mail.com',
+                 'password': "test_pass",
+                 'password_repeat': "test_pass2",
+                 'account_type': "1",
+                 'student_no': "1234"}
+        form = AccountCreateForm(data=data)
+        self.assertFalse(form.is_valid())
+
+    def test_account_create_form_no_stud_no(self):
+        data = { 'username': 'test_stud_username',
+                 'email': 'test@mail.com',
+                 'password': "test_pass",
+                 'password_repeat': "test_pass",
+                 'account_type': "1",}
+        form = AccountCreateForm(data=data)
+        self.assertFalse(form.is_valid())
+
+    def test_account_create_form_stud_no_not_a_number(self):
+        data = { 'username': 'test_stud_username',
+                 'email': 'test@mail.com',
+                 'password': "test_pass",
+                 'password_repeat': "test_pass",
+                 'account_type': "1",
+                 'student_no': "wrong_number"}
+        form = AccountCreateForm(data=data)
+        self.assertFalse(form.is_valid())
