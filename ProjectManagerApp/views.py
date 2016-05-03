@@ -4,18 +4,17 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from django.shortcuts import render, redirect
-from django.template import RequestContext
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
-    ProjectHasAssignedTeam
+    ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm
 from ProjectManagerApp.models import Project, Teacher, Student, Team
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
-    user_create_project, user_team_join_project
+    user_create_project, user_team_join_project, account_create_teacher, account_create_student
 
 
 class AccountCreateFormView(FormView):
@@ -43,22 +42,16 @@ class AccountCreateFormView(FormView):
 
         account_create_form = AccountCreateForm(request.POST)
         if account_create_form.is_valid():
-            if account_create_form.cleaned_data['account_type'] == AccountCreateForm.ACCOUNT_TYPE_STAFF:
-                user = Teacher()
-                user.is_staff = True
-            else:
-                user = Student()
-                user.is_staff = False
-                user.student_no = account_create_form.cleaned_data.get('student_no')
-
-            user.username = account_create_form.cleaned_data.get('username')
-            user.email = account_create_form.cleaned_data.get('email')
-            user.set_password(account_create_form.cleaned_data.get('password'))
-
             try:
-                user.save()
-            except IntegrityError:
+                if account_create_form.cleaned_data['account_type'] == AccountCreateForm.ACCOUNT_TYPE_STAFF:
+                    account_create_teacher(account_create_form.cleaned_data.get('username'), account_create_form.cleaned_data.get('email'), account_create_form.cleaned_data.get('password'))
+                else:
+                    account_create_student(account_create_form.cleaned_data.get('student_no'), account_create_form.cleaned_data.get('username'), account_create_form.cleaned_data.get('email'), account_create_form.cleaned_data.get('password'))
+            except UserWithGivenUsernameAlreadyExists:
                 account_create_form.add_error('username', 'User with given username already exists.')
+                return render(request, self.template_name, self.create_context_data(account_create_form))
+            except StudentWithGivenStudentNoAlreadyExists:
+                account_create_form.add_error('student_no', 'Student with given student no already exists.')
                 return render(request, self.template_name, self.create_context_data(account_create_form))
 
             messages.add_message(request, messages.SUCCESS, 'Account created.')

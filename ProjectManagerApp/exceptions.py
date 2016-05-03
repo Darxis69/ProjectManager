@@ -17,3 +17,10 @@ class MustBeTeacher(Exception):
 class ProjectHasAssignedTeam(Exception):
     pass
 
+
+class UserWithGivenUsernameAlreadyExists(Exception):
+    pass
+
+
+class StudentWithGivenStudentNoAlreadyExists(Exception):
+    pass

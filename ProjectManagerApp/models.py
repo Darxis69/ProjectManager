@@ -11,7 +11,7 @@ class Teacher(UserBase):
 
 
 class Student(UserBase):
-    student_no = models.IntegerField()
+    student_no = models.IntegerField(unique=True)
     team = models.ForeignKey('Team', null=True, related_name='+', on_delete=models.SET_NULL, unique=False)
     # todo status
     

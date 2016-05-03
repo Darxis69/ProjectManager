@@ -1,6 +1,6 @@
 from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, \
-    ProjectHasAssignedTeam
-from ProjectManagerApp.models import Student, Team, Teacher, Project
+    ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists
+from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
 
 
 def user_join_team(user, team):
@@ -99,3 +99,41 @@ def user_create_project(user, project_name, project_description):
 
     return project
 
+
+def account_create_teacher(username, email, password):
+    try:
+        if UserBase.objects.get(username__iexact=username):
+            raise UserWithGivenUsernameAlreadyExists
+    except UserBase.DoesNotExist:
+        pass
+
+    teacher = Teacher()
+    teacher.is_staff = True
+    teacher.username = username
+    teacher.email = email
+    teacher.set_password(password)
+
+    teacher.save()
+
+
+def account_create_student(student_no, username, email, password):
+    try:
+        if UserBase.objects.get(username__iexact=username):
+            raise UserWithGivenUsernameAlreadyExists
+    except UserBase.DoesNotExist:
+        pass
+
+    try:
+        if Student.objects.get(student_no=student_no):
+            raise StudentWithGivenStudentNoAlreadyExists
+    except UserBase.DoesNotExist:
+        pass
+
+    student = Student()
+    student.is_staff = False
+    student.student_no = student_no
+    student.username = username
+    student.email = email
+    student.set_password(password)
+
+    student.save()
