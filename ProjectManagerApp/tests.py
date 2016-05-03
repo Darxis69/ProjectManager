@@ -2,6 +2,7 @@ from django.test import TestCase
 from .models import User, Student, Teacher, Team, Project
 from .services import *
 from django.core.urlresolvers import reverse
+from django.db import IntegrityError
 
 # Create your tests here.
 
@@ -109,3 +110,29 @@ class ViewsTests(TestCase):
     def test_unlogged_user_get_teams(self):
         response = self.client.get('/teams/')
         self.assertRedirects(response, '/account/login/?next=/teams/')
+
+    # def test_login(self):
+    #     response = self.client.post('/account/login/', {'username': 'test', 'password': 'test_pass'})
+    #     self.assertEqual(response.status_code, 200)
+
+class ModelsTests(TestCase):
+
+    def test_create_studnet_with_the_same_username(self):
+        user = Student(username='test_username', student_no=1234)
+        user.set_password('test_password')
+        user.save()
+
+        user = Student(username='test_username', student_no=1212)
+        user.set_password('test_password')
+        with self.assertRaises(IntegrityError):
+            user.save()
+
+    def test_create_studnet_with_the_same_student_no(self):
+        user = Student(username='test_username', student_no=1234)
+        user.set_password('test_password')
+        user.save()
+
+        user = Student(username='test_username2', student_no=1234)
+        user.set_password('test_password')
+        with self.assertRaises(IntegrityError):
+            user.save()
