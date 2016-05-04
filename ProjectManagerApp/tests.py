@@ -8,7 +8,47 @@ from .forms import AccountCreateForm
 # Create your tests here.
 
 
-class ManageTeamsTests(TestCase):
+class CreateUsersServicesTests(TestCase):
+
+    def test_create_teacher(self):
+        account_create_teacher("test_teacher_username", "test@mail.com", "test_pass")
+
+        self.assertTrue(Teacher.objects.filter(username='test_teacher_username', email='test@mail.com').exists())
+        user = Teacher.objects.get(username='test_teacher_username')
+        self.assertEqual(user.email, "test@mail.com")
+
+    def test_create_student(self):
+        account_create_student("1234", "test_student_username", "test@mail.com", "test_pass")
+
+        self.assertTrue(Student.objects.filter(username='test_student_username', email='test@mail.com').exists())
+        user = Student.objects.get(username='test_student_username')
+        self.assertEqual(user.student_no, 1234)
+        self.assertEqual(user.email, "test@mail.com")
+
+    def test_create_student_with_the_same_studnet_no(self):
+        account_create_student("1234", "test_student_username", "test@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(StudentWithGivenStudentNoAlreadyExists, ""):
+            account_create_student("1234", "test_student_username2", "test2@mail.com", "test_pass")
+
+    def test_create_user_with_the_same_username(self):
+        account_create_student("1234", "test_student_username", "test@mail.com", "test_pass")
+        account_create_teacher("test_teacher_username", "test@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
+            account_create_student("1212", "test_student_username", "test2@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
+            account_create_student("1212", "test_teacher_username", "test2@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
+            account_create_teacher("test_teacher_username", "test2@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
+            account_create_teacher("test_student_username", "test2@mail.com", "test_pass")
+
+
+class ManageTeamsServicesTests(TestCase):
 
     def test_create_team(self):
         user = Student(username='test_username', email='test@mail.com', student_no="1234")
@@ -65,7 +105,7 @@ class ManageTeamsTests(TestCase):
             user_join_team(user, team2)
 
 
-class ManageProjectsTests(TestCase):
+class ManageProjectsServicesTests(TestCase):
 
     project_name = "test_project_name"
     project_descripton = "test_project_descrption"
@@ -154,7 +194,7 @@ class ViewsTests(TestCase):
         response = self.client.get('/account/create/')
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post('/account/create/',{ 'username': 'test__teacher_username',
+        response = self.client.post('/account/create/',{ 'username': 'test_teacher_username',
                                                          'email': 'test@mail.com',
                                                          'password': "test_pass",
                                                          'password_repeat': "test_pass",
@@ -162,8 +202,7 @@ class ViewsTests(TestCase):
 
         self.assertRedirects(response, '/account/login/')
 
-        self.assertTrue(Teacher.objects.filter(username='test__teacher_username', email='test@mail.com').exists())
-
+        self.assertTrue(Teacher.objects.filter(username='test_teacher_username', email='test@mail.com').exists())
 
     def test_wrong_login(self):
         response = self.client.post('/account/login/', {'username': 'test', 'password': 'test_pass'})
