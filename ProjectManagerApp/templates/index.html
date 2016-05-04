@@ -30,7 +30,7 @@
     <div class="col-md-4">
             <div class="panel panel-info">
                 <div class="panel-heading"><b>Team</b></div>
-                {% if user_has_team %}
+                {% if has_user_team %}
                 <div class="panel-body">
                     <p>You are assigned to: <a href="{% url 'teams_list_url' %}">{{ request.user.team.name }}</a></p>
                 </div>

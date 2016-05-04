@@ -1,4 +1,4 @@
-from ProjectManagerApp.models import Student, Teacher  # , Team, Project
+from ProjectManagerApp.models import Student, Teacher, Team, Project
 
 
 def is_student(request):
@@ -9,13 +9,13 @@ def is_teacher(request):
     return {'is_teacher': isinstance(request.user, Teacher)}
 
 
-def user_has_team(request):
-    return {'user_has_team': isinstance(request.user, Student) and request.user.team is not None}
+def has_user_team(request):
+    return {'has_user_team': isinstance(request.user, Student) and request.user.team is not None}
 
 
-# def teams():
-#    return {'teams': Team.objects.all()}
+def teams_count(request):
+    return {'teams_count': Team.objects.all().count()}
 
 
-# def projects():
-#    return {'projects': Project.objects.all()}
+def projects_count(request):
+    return {'teams_count': Project.objects.all().count()}

@@ -90,7 +90,7 @@ def user_team_leave_project(user, project):
     if project.assigned_team:
         raise ProjectHasAssignedTeam
 
-    project.all_teams.delete(user.team)
+    project.all_teams.remove(user.team)
     project.save(force_update=True)
 
 

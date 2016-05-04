@@ -16,7 +16,11 @@
                             <thead>
                                 <tr>
                                     <th>Project name</th>
-                                    <th>Assigned team</th>
+                                    {% if project.assigned_team %}
+                                        <th>Assigned team</th>
+                                    {% else %}
+                                        <th>Waiting teams</th>
+                                    {% endif %}
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -27,6 +31,10 @@
                                     <td>
                                         {% if project.assigned_team %}
                                             <a href="{% url 'teams_list_url' %}">{{ project.assigned_team.name }}</a>
+                                        {% elif project.all_teams %}
+                                            {% for team in project.all_teams.all %}
+                                                <a href="{% url 'teams_list_url' %}">{{ team.name }}</a>
+                                            {% endfor %}
                                         {% else %}
                                             None
                                         {% endif %}
@@ -44,6 +52,12 @@
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary" name="project_id" value="{{ project.id }}">
                                                     <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{% url 'project_leave_url' %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-danger" name="project_id" value="{{ project.id }}">
+                                                    <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
                                                 </button>
                                             </form>
                                         {% endif %}
