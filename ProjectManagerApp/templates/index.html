@@ -5,26 +5,50 @@
 <div class="row">
     <div class="col-md-4">
             <div class="panel panel-primary">
-                <div class="panel-heading">Home</div>
+                <div class="panel-heading"><b>Home</b></div>
                 <div class="panel-body">
                     <p>Some simple description of this panel.</p>
                 </div>
                 <div class="list-group">
-                    <a href="{% url 'projects_list_url' %}" class="list-group-item">Projects <span class="badge">50</span></a>
-                    <a href="{% url 'teams_list_url' %}" class="list-group-item">Teams <span class="badge">50</span></a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">Projects <span class="badge">{{ projects_count }}</span></a>
+                    <a href="{% url 'teams_list_url' %}" class="list-group-item">Teams <span class="badge">{{ teams_count }}</span></a>
                 </div>
             </div>
     </div>
     <div class="col-md-4">
             <div class="panel panel-success">
-                <div class="panel-heading">Project</div>
+                <div class="panel-heading"><b>Project</b></div>
+                {% if user_team_assigned_project %}
                 <div class="panel-body">
-                    <p>Some simple description of this panel.</p>
+                    <p>Your team is assigned to: <a href="{% url 'projects_list_url' %}">{{ user_team_assigned_project.name }}</a></p>
                 </div>
                 <div class="list-group">
-                    <a href="#" class="list-group-item">option one</a>
-                    <a href="#" class="list-group-item">option two</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View your project</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all projects</a>
                 </div>
+                {% elif user_team_applied_project %}
+                <div class="panel-body">
+                    <p>Your team is waiting for: <a href="{% url 'projects_list_url' %}">{{ user_team_applied_project.name }}</a></p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View your project</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Choose another project</a>
+                </div>
+                {% else %}
+                <div class="panel-body">
+                    <p>Your team is not assigned to any project.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Add your team to a project</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all projects</a>
+                </div>
+                {% endif %}
             </div>
     </div>
     <div class="col-md-4">

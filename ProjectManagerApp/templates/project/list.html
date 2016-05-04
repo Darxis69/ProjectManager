@@ -27,7 +27,7 @@
                             <tbody>
                             {% for project in projects %}
                                 <tr>
-                                    <td><a href="{%  url 'project_details_url' %}?id={{ project.id }}">{{ project.name }}</a></td>
+                                    <td><a href="{% url 'project_details_url' %}?id={{ project.id }}">{{ project.name }}</a></td>
                                     <td>
                                         {% if project.assigned_team %}
                                             <a href="{% url 'teams_list_url' %}">{{ project.assigned_team.name }}</a>
@@ -47,19 +47,22 @@
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                                 </button>
                                             </form>
-                                        {% elif is_student %}
+                                        {% elif is_student and not user_team_assigned_project %}
+                                            {% if not user_team_applied_project %}
                                             <form method="post" action="{% url 'project_join_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary" name="project_id" value="{{ project.id }}">
                                                     <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
                                                 </button>
                                             </form>
+                                            {% else %}
                                             <form method="post" action="{% url 'project_leave_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-danger" name="project_id" value="{{ project.id }}">
                                                     <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
                                                 </button>
                                             </form>
+                                            {% endif %}
                                         {% endif %}
                                     </td>
                                 </tr>

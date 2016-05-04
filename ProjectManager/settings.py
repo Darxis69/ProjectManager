@@ -72,7 +72,9 @@ TEMPLATES = [
                 'ProjectManagerApp.context_processors.is_teacher',
                 'ProjectManagerApp.context_processors.has_user_team',
                 'ProjectManagerApp.context_processors.teams_count',
-                'ProjectManagerApp.context_processors.projects_count'
+                'ProjectManagerApp.context_processors.projects_count',
+                'ProjectManagerApp.context_processors.user_team_assigned_project',
+                'ProjectManagerApp.context_processors.user_team_applied_project'
             ],
         },
     },
