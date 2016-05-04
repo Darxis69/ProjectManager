@@ -5,6 +5,7 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">{{ project.name }}</div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'projects_list_url' %}">Return to all projects</a></div>
             </div>
             <div class="panel-body">
                 {{ project.description }}

@@ -1,5 +1,6 @@
 from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, \
-    ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists
+    ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
+    TeamAlreadyInProjectQueue, TeamNotInProjectQueue
 from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
 
 
@@ -51,7 +52,6 @@ def user_team_leave(user):
         team.second_teammate = None
 
     if team.first_teammate is None and team.second_teammate is None:
-        # TODO exception checking
         team.delete()
     else:
         team.save(force_update=True)
@@ -67,10 +67,30 @@ def user_team_join_project(user, project):
     if not user.team:
         raise UserNotInTeam
 
+    if project.all_teams.filter(name=user.team.name).exists():
+        raise TeamAlreadyInProjectQueue
+
     if project.assigned_team:
         raise ProjectHasAssignedTeam
 
-    project.assigned_team = user.team
+    project.all_teams.add(user.team)
+    project.save(force_update=True)
+
+
+def user_team_leave_project(user, project):
+    if not isinstance(user, Student):
+        raise MustBeStudent
+
+    if not user.team:
+        raise UserNotInTeam
+
+    if not project.all_teams.filter(name=user.team.name).exists():
+        raise TeamNotInProjectQueue
+
+    if project.assigned_team:
+        raise ProjectHasAssignedTeam
+
+    project.all_teams.delete(user.team)
     project.save(force_update=True)
 
 
@@ -132,6 +152,7 @@ def account_create_student(student_no, username, email, password):
     student = Student()
     student.is_staff = False
     student.student_no = student_no
+    student.status = Student.STUDENT_STATUS_UNASSIGNED
     student.username = username
     student.email = email
     student.set_password(password)

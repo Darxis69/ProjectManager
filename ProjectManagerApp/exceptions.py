@@ -24,3 +24,11 @@ class UserWithGivenUsernameAlreadyExists(Exception):
 
 class StudentWithGivenStudentNoAlreadyExists(Exception):
     pass
+
+
+class TeamAlreadyInProjectQueue(Exception):
+    pass
+
+
+class TeamNotInProjectQueue(Exception):
+    pass

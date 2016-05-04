@@ -9,11 +9,12 @@ from django.views.generic import FormView
 from django.views.generic import TemplateView
 
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
-    ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists
+    ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
+    TeamAlreadyInProjectQueue, TeamNotInProjectQueue
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm
 from ProjectManagerApp.models import Project, Team
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
-    user_create_project, user_team_join_project, account_create_teacher, account_create_student
+    user_create_project, user_team_join_project, account_create_teacher, account_create_student, user_team_leave_project
 
 
 class AccountCreateFormView(FormView):
@@ -262,6 +263,36 @@ def project_join(request):
         return redirect(reverse('projects_list_url'))
     except UserNotInTeam:
         messages.add_message(request, messages.ERROR, 'You have no team. Join or create your own team first.')
+        return redirect(reverse('projects_list_url'))
+    except TeamAlreadyInProjectQueue:
+        messages.add_message(request, messages.ERROR, 'Your team is already in the project queue.')
+        return redirect(reverse('projects_list_url'))
+    except ProjectHasAssignedTeam:
+        messages.add_message(request, messages.ERROR, 'This project has already an assigned team.')
+        return redirect(reverse('projects_list_url'))
+
+    return redirect(reverse('projects_list_url'))
+
+
+@require_http_methods(["POST"])
+@login_required
+def project_leave(request):
+    try:
+        project = Project.objects.get(pk=request.POST.get('project_id'))
+    except (KeyError, Project.DoesNotExist):
+        messages.add_message(request, messages.ERROR, 'Invalid project.')
+        return redirect(reverse('projects_list_url'))
+
+    try:
+        user_team_leave_project(request.user, project)
+    except MustBeStudent:
+        messages.add_message(request, messages.ERROR, 'Only students are allowed to assign their team to a project.')
+        return redirect(reverse('projects_list_url'))
+    except UserNotInTeam:
+        messages.add_message(request, messages.ERROR, 'You have no team. Join or create your own team first.')
+        return redirect(reverse('projects_list_url'))
+    except TeamNotInProjectQueue:
+        messages.add_message(request, messages.ERROR, 'Your team is not in the project queue.')
         return redirect(reverse('projects_list_url'))
     except ProjectHasAssignedTeam:
         messages.add_message(request, messages.ERROR, 'This project has already an assigned team.')
