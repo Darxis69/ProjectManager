@@ -84,9 +84,9 @@ class ManageTeamsServicesTests(TestCase):
         user_create_team(user, "test_team")
         self.assertTrue(Team.objects.filter(name="test_team").exists())
         team = Team.objects.get(name="test_team")
-        self.assertEqual(user.team, team)
+        self.assertEqual(user2.team, team)
 
-        user_join_team(user2,team)
+        user_join_team(user2, team)
         self.assertEqual(team.second_teammate, user2)
         self.assertEqual(user2.team, team)
 
@@ -96,8 +96,6 @@ class ManageTeamsServicesTests(TestCase):
         self.assertEqual(user2.team, team)
         self.assertEqual(team.first_teammate, None)
         self.assertEqual(team.second_teammate, user2)
-
-
 
     def test_create_team_as_teacher(self):
         user = Teacher()
