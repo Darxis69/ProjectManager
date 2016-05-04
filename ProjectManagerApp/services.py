@@ -48,6 +48,9 @@ def user_team_leave(user):
 
     if team.first_teammate == user:
         team.first_teammate = None
+        if team.second_teammate is not None:
+            team.first_teammate = team.second_teammate
+            team.second_teammate = None
     elif team.second_teammate == user:
         team.second_teammate = None
 
@@ -58,6 +61,9 @@ def user_team_leave(user):
 
     user.team = None
     user.save()
+
+    if team.first_teammate is not None:
+        team.first_teammate.team.refresh_from_db()
 
 
 def user_team_join_project(user, project):
