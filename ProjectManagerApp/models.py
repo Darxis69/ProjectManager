@@ -45,5 +45,5 @@ class Project(models.Model):
     description = models.CharField(max_length=200)
     status = models.CharField(max_length=1, choices=PROJECT_STATUS)
     assigned_team = models.OneToOneField(Team, null=True, related_name="project", on_delete=models.SET_NULL)
-    all_teams = models.ManyToManyField(Team, null=True, on_delete=models.SET_NULL)
+    all_teams = models.ManyToManyField(Team, related_name="+")
     author = models.ForeignKey(Teacher, null=False, related_name="+", on_delete=models.CASCADE)
