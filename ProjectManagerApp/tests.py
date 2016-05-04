@@ -59,6 +59,45 @@ class ManageTeamsServicesTests(TestCase):
         self.assertTrue(Team.objects.filter(name="test_team").exists())
         team = Team.objects.get(name="test_team")
         self.assertEqual(team.first_teammate, user)
+        self.assertEqual(user.team, team)
+
+    def test_leave_one_person_team(self):
+        user = Student(username='test_username', email='test@mail.com', student_no="1234")
+        user.save()
+
+        user_create_team(user, "test_team")
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+        team = Team.objects.get(name="test_team")
+        self.assertEqual(user.team, team)
+
+        user_team_leave(user)
+        self.assertFalse(Team.objects.filter(name="test_team").exists())
+        self.assertEqual(user.team, None)
+
+    def test_leave_two_persons_team(self):
+        user = Student(username='test_username', email='test@mail.com', student_no="1234")
+        user.save()
+
+        user2 = Student(username='test_username2', email='test2@mail.com', student_no="1212")
+        user2.save()
+
+        user_create_team(user, "test_team")
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+        team = Team.objects.get(name="test_team")
+        self.assertEqual(user.team, team)
+
+        user_join_team(user2,team)
+        self.assertEqual(team.second_teammate, user2)
+        self.assertEqual(user2.team, team)
+
+        user_team_leave(user)
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+        self.assertEqual(user.team, None)
+        self.assertEqual(user2.team, team)
+        self.assertEqual(team.first_teammate, None)
+        self.assertEqual(team.second_teammate, user2)
+
+
 
     def test_create_team_as_teacher(self):
         user = Teacher()
