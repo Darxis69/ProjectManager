@@ -29,7 +29,6 @@ class Team(models.Model):
     name = models.CharField(max_length=50)
     first_teammate = models.OneToOneField(Student, null=True, related_name='+', on_delete=models.SET_NULL, unique=True)
     second_teammate = models.OneToOneField(Student, null=True, related_name='+', on_delete=models.SET_NULL, unique=True)
-    project = models.OneToOneField('Project', null=True, on_delete=models.SET_NULL)
 
 
 class Project(models.Model):
@@ -45,6 +44,6 @@ class Project(models.Model):
     name = models.CharField(max_length=50)
     description = models.CharField(max_length=200)
     status = models.CharField(max_length=1, choices=PROJECT_STATUS)
-    assigned_team = models.OneToOneField(Team, null=True, on_delete=models.SET_NULL)
+    assigned_team = models.OneToOneField(Team, null=True, related_name="project", on_delete=models.SET_NULL)
     all_teams = models.ManyToManyField(Team, null=True, on_delete=models.SET_NULL)
     author = models.ForeignKey(Teacher, null=False, related_name="+", on_delete=models.CASCADE)
