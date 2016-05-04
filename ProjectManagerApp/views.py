@@ -2,7 +2,6 @@ from django.contrib.auth import authenticate as auth_authenticate, login as auth
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
-from django.db import IntegrityError
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
@@ -12,7 +11,7 @@ from django.views.generic import TemplateView
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm
-from ProjectManagerApp.models import Project, Teacher, Student, Team
+from ProjectManagerApp.models import Project, Team
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
     user_create_project, user_team_join_project, account_create_teacher, account_create_student
 
@@ -269,6 +268,20 @@ def project_join(request):
         return redirect(reverse('projects_list_url'))
 
     return redirect(reverse('projects_list_url'))
+
+
+@method_decorator(login_required, name='dispatch')
+class ProjectDetailsView(TemplateView):
+    template_name = 'project/details.html'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            project = Project.objects.get(pk=request.GET.get('id'))
+        except (KeyError, Project.DoesNotExist):
+            messages.add_message(request, messages.ERROR, 'Invalid project.')
+            return redirect(reverse('projects_list_url'))
+
+        return render(request, self.template_name, { 'project': project })
 
 
 @require_http_methods(["POST"])
