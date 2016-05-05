@@ -108,7 +108,6 @@ class IndexView(TemplateView):
         return render(request, self.template_name, self.get_context_data())
 
 
-@login_required
 def logout(request):
     auth_logout(request)
     return redirect(reverse('account_login_url'))
