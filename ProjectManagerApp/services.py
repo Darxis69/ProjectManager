@@ -73,8 +73,8 @@ def user_team_join_project(user, project):
     if not user.team:
         raise UserNotInTeam
 
-    for project in Project.objects.all():
-        if project.all_teams.filter(name=user.team.name).exists():
+    for singleProject in Project.objects.all():
+        if singleProject.all_teams.filter(name=user.team.name).exists():
             raise TeamAlreadyInProjectQueue
 
     if project.assigned_team:
