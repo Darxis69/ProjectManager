@@ -130,7 +130,7 @@ class ManageTeamsServicesTests(TestCase):
         user_team_leave(user2)
         self.assertTrue(Team.objects.filter(name="test_team").exists())
         team.refresh_from_db()
-        
+
         self.assertEqual(user2.team, None)
         self.assertEqual(user.team, team)
         self.assertEqual(team.first_teammate, user)
@@ -234,6 +234,59 @@ class ManageProjectsServicesTests(TestCase):
         user_delete_project(user, project)
 
         self.assertFalse(Project.objects.filter(name=self.project_name).exists())
+
+    #TODO
+    def test_join_project(self):
+        user = Teacher()
+        user.save()
+        project = user_create_project(user, self.project_name, self.project_descripton)
+        project.save()
+
+        self.assertTrue(Project.objects.filter(name=self.project_name).exists())
+
+        # user2 = Student()
+        # team = Team(first_teammate=user2)
+        # user2.team = team
+
+        account_create_student("1234", "test_student_username", "test@mail.com", "test_pass")
+
+        self.assertTrue(Student.objects.filter(username='test_student_username', email='test@mail.com').exists())
+        user2 = Student.objects.get(username='test_student_username')
+
+        user_create_team(user2, "test_team")
+
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+        team = Team.objects.get(name="test_team")
+
+        user_team_join_project(user2, project)
+
+        self.assertTrue(Project.objects.filter(name=self.project_name).exists())
+        project.refresh_from_db()
+        self.assertTrue(project.all_teams.filter(name=user2.team.name).exists())
+
+    #TODO
+    def test_join_project_as_a_teacher(self):
+        user = Teacher()
+        user.save()
+        project = user_create_project(user, self.project_name, self.project_descripton)
+        project.save()
+
+        self.assertTrue(Project.objects.filter(name=self.project_name).exists())
+
+        with self.assertRaisesMessage(MustBeStudent, ""):
+            user_team_join_project(user, project)
+
+    #TODO
+    def test_leave_project_as_a_teacher(self):
+        user = Teacher()
+        user.save()
+        project = user_create_project(user, self.project_name, self.project_descripton)
+        project.save()
+
+        self.assertTrue(Project.objects.filter(name=self.project_name).exists())
+
+        with self.assertRaisesMessage(MustBeStudent, ""):
+            user_team_leave_project(user, project)
 
 
 class ViewsTests(TestCase):
