@@ -1,4 +1,5 @@
-from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
+from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout, \
+    update_session_auth_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -11,11 +12,12 @@ from django.views.generic import TemplateView
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword
-from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, AccountChangeEmailForm, AccountChangePasswordForm
+from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, \
+    AccountChangeEmailForm, AccountChangePasswordForm
 from ProjectManagerApp.models import Project, Team
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
-    user_create_project, user_team_join_project, account_create_teacher, account_create_student, user_team_leave_project, user_change_email, \
-    user_change_password
+    user_create_project, user_team_join_project, account_create_teacher, account_create_student, \
+    user_team_leave_project, user_change_email, user_change_password
 
 
 class AccountCreateFormView(FormView):
@@ -45,9 +47,14 @@ class AccountCreateFormView(FormView):
         if account_create_form.is_valid():
             try:
                 if account_create_form.cleaned_data['account_type'] == AccountCreateForm.ACCOUNT_TYPE_STAFF:
-                    account_create_teacher(account_create_form.cleaned_data.get('username'), account_create_form.cleaned_data.get('email'), account_create_form.cleaned_data.get('password'))
+                    account_create_teacher(account_create_form.cleaned_data.get('username'),
+                                           account_create_form.cleaned_data.get('email'),
+                                           account_create_form.cleaned_data.get('password'))
                 else:
-                    account_create_student(account_create_form.cleaned_data.get('student_no'), account_create_form.cleaned_data.get('username'), account_create_form.cleaned_data.get('email'), account_create_form.cleaned_data.get('password'))
+                    account_create_student(account_create_form.cleaned_data.get('student_no'),
+                                           account_create_form.cleaned_data.get('username'),
+                                           account_create_form.cleaned_data.get('email'),
+                                           account_create_form.cleaned_data.get('password'))
             except UserWithGivenUsernameAlreadyExists:
                 account_create_form.add_error('username', 'User with given username already exists.')
                 return render(request, self.template_name, self.create_context_data(account_create_form))
@@ -182,7 +189,8 @@ class AccountChangePasswordFormView(FormView):
         account_change_password_form = AccountChangePasswordForm(request.POST)
         if account_change_password_form.is_valid():
             try:
-                user_change_password(request.user, account_change_password_form.cleaned_data.get('current_password'), account_change_password_form.cleaned_data.get('new_password'))
+                user_change_password(request.user, account_change_password_form.cleaned_data.get('current_password'),
+                                     account_change_password_form.cleaned_data.get('new_password'))
                 update_session_auth_hash(request, request.user)
             except InvalidPassword:
                 messages.add_message(request, messages.ERROR, 'Invalid current password.')
@@ -392,7 +400,7 @@ class ProjectDetailsView(TemplateView):
             messages.add_message(request, messages.ERROR, 'Invalid project.')
             return redirect(reverse('projects_list_url'))
 
-        return render(request, self.template_name, { 'project': project })
+        return render(request, self.template_name, {'project': project})
 
 
 @require_http_methods(["POST"])

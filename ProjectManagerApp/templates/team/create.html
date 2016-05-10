@@ -5,6 +5,7 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">Create team</div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'teams_list_url' %}">Return to all teams</a></div>
             </div>
             <div class="panel-body">
                 <form action="{% url 'team_create_url' %}" method="POST" class="form">
