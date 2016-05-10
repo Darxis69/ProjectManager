@@ -41,9 +41,10 @@
                                     </td>
                                     <td align="center">
                                         {% if is_teacher %}
-                                            <form method="post" action="{% url 'project_delete_url' %}">
+                                            <form method="post" action="{% url 'project_delete_url' %}" name="project_delete_form">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger" name="project_id" value="{{ project.id }}">
+                                                <input type="hidden" name="project_id" value="{{ project.id }}" />
+                                                <button type="submit" class="btn btn-danger">
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                                 </button>
                                             </form>
@@ -69,6 +70,9 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                        <script>
+                            makeConfirmableForms($("form[name='project_delete_form']"), "Are you sure you want to delete this project?");
+                        </script>
                     </div>
                 {% else %}
                     <p>No projects found.</p>

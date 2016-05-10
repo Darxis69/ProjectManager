@@ -32,9 +32,10 @@
                                     {% if is_student %}
                                     <td align="center">
                                         {% if request.user == team.first_teammate or request.user == team.second_teammate %}
-                                            <form method="post" action="{% url 'team_leave_url' %}">
+                                            <form method="post" action="{% url 'team_leave_url' %}" name="team_leave_form">
                                                 {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger" name="team_id" value={{ team.id }}>
+                                                <input type="hidden" name="team_id" value="{{ team.id }}" />
+                                                <button type="submit" class="btn btn-danger" >
                                                     <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
                                                 </button>
                                             </form>
@@ -52,6 +53,9 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                        <script>
+                            makeConfirmableForms($("form[name='team_leave_form']"), "Are you sure you want to leave this team?");
+                        </script>
                     </div>
                 {% else %}
                     <p>No teams found.</p>
