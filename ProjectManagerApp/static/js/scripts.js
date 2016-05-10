@@ -1,5 +1,5 @@
-function makeConfirmableForm(form) {
-    form.submit(function(e) {
+function makeConfirmableForms(form) {
+    $(form).submit(function(e) {
         var currentForm = this;
         e.preventDefault();
         bootbox.confirm("Are you sure?", function(result) {
