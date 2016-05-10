@@ -49,14 +49,14 @@
                                                 </button>
                                             </form>
                                         {% elif is_student and not user_team_assigned_project %}
-                                            {% if not user_team_applied_project %}
+                                            {% if not user_team_applied_project and has_user_team %}
                                             <form method="post" action="{% url 'project_join_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary" name="project_id" value="{{ project.id }}">
                                                     <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
                                                 </button>
                                             </form>
-                                            {% else %}
+                                            {% elif user_team_applied_project and user_team_applied_project.id == project.id %}
                                             <form method="post" action="{% url 'project_leave_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-danger" name="project_id" value="{{ project.id }}">

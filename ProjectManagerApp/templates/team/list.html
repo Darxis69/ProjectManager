@@ -5,7 +5,7 @@
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">List of all teams</div>
-                {% if not has_user_team %}
+                {% if is_student and not has_user_team %}
                 <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'team_create_url' %}">Create team</a></div>
                 {% endif %}
             </div>
@@ -39,7 +39,7 @@
                                                     <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
                                                 </button>
                                             </form>
-                                        {% elif not team.first_teammate or not team.second_teammate %}
+                                        {% elif not has_user_team %}
                                             <form method="post" action="{% url 'team_join_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary" name="team_id" value={{ team.id }}>
