@@ -51,6 +51,9 @@ class AccountCreateFormView(FormView):
             except UserWithGivenUsernameAlreadyExists:
                 account_create_form.add_error('username', 'User with given username already exists.')
                 return render(request, self.template_name, self.create_context_data(account_create_form))
+            except UserWithGivenEmailAlreadyExists:
+                account_create_form.add_error('email', 'User with given email already exists.')
+                return render(request, self.template_name, self.create_context_data(account_create_form))
             except StudentWithGivenStudentNoAlreadyExists:
                 account_create_form.add_error('student_no', 'Student with given student no already exists.')
                 return render(request, self.template_name, self.create_context_data(account_create_form))

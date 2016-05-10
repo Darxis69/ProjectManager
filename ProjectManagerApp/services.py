@@ -126,13 +126,24 @@ def user_create_project(user, project_name, project_description):
     return project
 
 
-def account_create_teacher(username, email, password):
+def validate_common_create_user_rules(username, email):
     try:
         if UserBase.objects.get(username__iexact=username):
             raise UserWithGivenUsernameAlreadyExists
     except UserBase.DoesNotExist:
         pass
 
+    try:
+        if UserBase.objects.get(email__iexact=email):
+            raise UserWithGivenEmailAlreadyExists
+    except UserBase.DoesNotExist:
+        pass
+
+    return True
+
+
+def account_create_teacher(username, email, password):
+    validate_common_create_user_rules(username, email)
     teacher = Teacher()
     teacher.is_staff = True
     teacher.username = username
@@ -143,12 +154,7 @@ def account_create_teacher(username, email, password):
 
 
 def account_create_student(student_no, username, email, password):
-    try:
-        if UserBase.objects.get(username__iexact=username):
-            raise UserWithGivenUsernameAlreadyExists
-    except UserBase.DoesNotExist:
-        pass
-
+    validate_common_create_user_rules(username, email)
     try:
         if Student.objects.get(student_no=student_no):
             raise StudentWithGivenStudentNoAlreadyExists
