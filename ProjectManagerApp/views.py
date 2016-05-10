@@ -273,6 +273,20 @@ def team_join(request):
     return redirect(reverse('teams_list_url'))
 
 
+@method_decorator(login_required, name='dispatch')
+class TeamDetailsView(TemplateView):
+    template_name = 'team/details.html'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            team = Team.objects.get(pk=request.GET.get('id'))
+        except (KeyError, Team.DoesNotExist):
+            messages.add_message(request, messages.ERROR, 'Invalid team.')
+            return redirect(reverse('teams_list_url'))
+
+        return render(request, self.template_name, {'team': team})
+
+
 @login_required
 def team_leave(request):
     try:
