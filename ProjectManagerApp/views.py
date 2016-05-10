@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -10,11 +10,12 @@ from django.views.generic import TemplateView
 
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
-    TeamAlreadyInProjectQueue, TeamNotInProjectQueue
-from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm
+    TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword
+from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, AccountChangeEmailForm, AccountChangePasswordForm
 from ProjectManagerApp.models import Project, Team
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
-    user_create_project, user_team_join_project, account_create_teacher, account_create_student, user_team_leave_project
+    user_create_project, user_team_join_project, account_create_teacher, account_create_student, user_team_leave_project, user_change_email, \
+    user_change_password
 
 
 class AccountCreateFormView(FormView):
@@ -111,6 +112,83 @@ class IndexView(TemplateView):
 def logout(request):
     auth_logout(request)
     return redirect(reverse('account_login_url'))
+
+
+@method_decorator(login_required, name='dispatch')
+class AccountDetailsView(TemplateView):
+    template_name = 'account/details.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(AccountDetailsView, self).get_context_data(**kwargs)
+        return context
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, self.get_context_data())
+
+
+@method_decorator(login_required, name='dispatch')
+class AccountChangeEmailFormView(FormView):
+    template_name = 'account/changeEmail.html'
+    form_class = AccountChangeEmailForm
+
+    def get_context_data(self, **kwargs):
+        return self.create_context_data(AccountChangeEmailForm(self.request.POST)
+                                        if self.request.method == "POST" else AccountChangeEmailForm())
+
+    def create_context_data(self, account_change_email_form, **kwargs):
+        context = super(AccountChangeEmailFormView, self).get_context_data(**kwargs)
+        context['account_change_email_form'] = account_change_email_form
+        return context
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, self.get_context_data())
+
+    def post(self, request, *args, **kwargs):
+        account_change_email_form = AccountChangeEmailForm(request.POST)
+        if account_change_email_form.is_valid():
+            try:
+                user_change_email(request.user, account_change_email_form.cleaned_data.get('new_email'))
+            except UserWithGivenEmailAlreadyExists:
+                messages.add_message(request, messages.ERROR, 'User with given email already exists.')
+                return render(request, self.template_name, self.get_context_data())
+
+            messages.add_message(request, messages.SUCCESS, 'Email changed.')
+            return render(request, self.template_name, self.get_context_data())
+
+        return render(request, self.template_name, self.create_context_data(account_change_email_form))
+
+
+@method_decorator(login_required, name='dispatch')
+class AccountChangePasswordFormView(FormView):
+    template_name = 'account/changePassword.html'
+    form_class = AccountChangePasswordForm
+
+    def get_context_data(self, **kwargs):
+        return self.create_context_data(AccountChangePasswordForm(self.request.POST)
+                                        if self.request.method == "POST" else AccountChangePasswordForm())
+
+    def create_context_data(self, account_change_password_form, **kwargs):
+        context = super(AccountChangePasswordFormView, self).get_context_data(**kwargs)
+        context['account_change_password_form'] = account_change_password_form
+        return context
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, self.get_context_data())
+
+    def post(self, request, *args, **kwargs):
+        account_change_password_form = AccountChangePasswordForm(request.POST)
+        if account_change_password_form.is_valid():
+            try:
+                user_change_password(request.user, account_change_password_form.cleaned_data.get('current_password'), account_change_password_form.cleaned_data.get('new_password'))
+                update_session_auth_hash(request, request.user)
+            except InvalidPassword:
+                messages.add_message(request, messages.ERROR, 'Invalid current password.')
+                return render(request, self.template_name, self.get_context_data())
+
+            messages.add_message(request, messages.SUCCESS, 'Password changed.')
+            return render(request, self.template_name, self.get_context_data())
+
+        return render(request, self.template_name, self.create_context_data(account_change_password_form))
 
 
 @method_decorator(login_required, name='dispatch')

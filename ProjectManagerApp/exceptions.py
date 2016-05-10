@@ -22,6 +22,10 @@ class UserWithGivenUsernameAlreadyExists(Exception):
     pass
 
 
+class UserWithGivenEmailAlreadyExists(Exception):
+    pass
+
+
 class StudentWithGivenStudentNoAlreadyExists(Exception):
     pass
 
@@ -31,4 +35,8 @@ class TeamAlreadyInProjectQueue(Exception):
 
 
 class TeamNotInProjectQueue(Exception):
+    pass
+
+
+class InvalidPassword(Exception):
     pass

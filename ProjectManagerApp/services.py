@@ -1,6 +1,6 @@
 from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
-    TeamAlreadyInProjectQueue, TeamNotInProjectQueue
+    TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword
 from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
 
 
@@ -164,3 +164,22 @@ def account_create_student(student_no, username, email, password):
     student.set_password(password)
 
     student.save()
+
+
+def user_change_password(user, current_password, new_password):
+    if user.check_password(current_password) is False:
+        raise InvalidPassword
+
+    user.set_password(new_password)
+    user.save(force_update=True)
+
+
+def user_change_email(user, new_email):
+    try:
+        if UserBase.objects.get(email__iexact=new_email):
+            raise UserWithGivenEmailAlreadyExists
+    except UserBase.DoesNotExist:
+        pass
+
+    user.email = new_email
+    user.save(force_update=True)

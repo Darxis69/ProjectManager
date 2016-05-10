@@ -8,6 +8,25 @@ class LoginForm(forms.Form):
     password = forms.CharField(label='Password', widget=PasswordInput())
 
 
+class AccountChangeEmailForm(forms.Form):
+    new_email = forms.EmailField(label='New email')
+
+
+class AccountChangePasswordForm(forms.Form):
+    current_password = forms.CharField(label='Current password', widget=PasswordInput())
+    new_password = forms.CharField(label='New password', widget=PasswordInput())
+    new_password_repeat = forms.CharField(label='New password repeat', widget=PasswordInput())
+
+    def clean(self):
+        cleaned_new_password = self.cleaned_data.get('new_password')
+        cleaned_new_password_repeat = self.cleaned_data.get('new_password_repeat')
+
+        if cleaned_new_password != cleaned_new_password_repeat:
+            raise ValidationError("Passwords don't match.", code='not_match')
+
+        return self.cleaned_data
+
+
 class AccountCreateForm(forms.Form):
     ACCOUNT_TYPE_STUDENT = '1'
     ACCOUNT_TYPE_STUDENT_LABEL = 'Student'

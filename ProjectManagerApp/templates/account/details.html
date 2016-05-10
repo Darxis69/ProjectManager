@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
+{% block content %}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-primary">
+            <div class="panel-heading"><b>My account</b></div>
+            <div class="panel-body">
+                <p>Username: {{ request.user.username }}</p>
+                <p>Email: {{ request.user.email }}</p>
+                <p>Account type: {% if is_student %}Student{% else %}Staff{% endif %}</p>
+                {% if is_student %}
+                    <p>Student No: {{ request.user.student_no }}</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
