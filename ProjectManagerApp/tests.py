@@ -32,20 +32,36 @@ class CreateUsersServicesTests(TestCase):
             account_create_student("1234", "test_student_username2", "test2@mail.com", "test_pass")
 
     def test_create_user_with_the_same_username(self):
-        account_create_student("1234", "test_student_username", "test@mail.com", "test_pass")
-        account_create_teacher("test_teacher_username", "test@mail.com", "test_pass")
+        account_create_student("1234", "test_student_username", "test1@mail.com", "test_pass")
+        account_create_teacher("test_teacher_username", "test2@mail.com", "test_pass")
 
         with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
-            account_create_student("1212", "test_student_username", "test2@mail.com", "test_pass")
+            account_create_student("1212", "test_student_username", "test3@mail.com", "test_pass")
 
         with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
-            account_create_student("1212", "test_teacher_username", "test2@mail.com", "test_pass")
+            account_create_student("1212", "test_teacher_username", "test3@mail.com", "test_pass")
 
         with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
-            account_create_teacher("test_teacher_username", "test2@mail.com", "test_pass")
+            account_create_teacher("test_teacher_username", "test3@mail.com", "test_pass")
 
         with self.assertRaisesMessage(UserWithGivenUsernameAlreadyExists, ""):
-            account_create_teacher("test_student_username", "test2@mail.com", "test_pass")
+            account_create_teacher("test_student_username", "test3@mail.com", "test_pass")
+
+    def test_create_user_with_the_same_email(self):
+        account_create_student("1234", "test_student_username", "test1@mail.com", "test_pass")
+        account_create_teacher("test_teacher_username", "test2@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenEmailAlreadyExists, ""):
+            account_create_student("1212", "test_student_username1", "test1@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenEmailAlreadyExists, ""):
+            account_create_student("1212", "test_teacher_username1", "test2@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenEmailAlreadyExists, ""):
+            account_create_teacher("test_teacher_username1", "test1@mail.com", "test_pass")
+
+        with self.assertRaisesMessage(UserWithGivenEmailAlreadyExists, ""):
+            account_create_teacher("test_student_username1", "test2@mail.com", "test_pass")
 
 
 class ManageTeamsServicesTests(TestCase):
