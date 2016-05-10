@@ -4,11 +4,15 @@
     <div class="col-md-6 col-md-offset-3">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <div class="panel-title">{{ project.name }}</div>
+                <div class="panel-title">Project details</div>
                 <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'projects_list_url' %}">Return to all projects</a></div>
             </div>
             <div class="panel-body">
-                {{ project.description }}
+                <p>Name: {{ project.name }}</p>
+                <p>Description:</p>
+                <div class="well well-sm" style="background-color: white; font-size: 90%;">
+                    {{ project.description }}
+                </div>
             </div>
         </div>
     </div>
