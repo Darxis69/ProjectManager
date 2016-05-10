@@ -30,10 +30,10 @@
                 </div>
                 {% elif user_team_applied_project %}
                 <div class="panel-body">
-                    <p>Your team is waiting for: <a href="{% url 'projects_list_url' %}">{{ user_team_applied_project.name }}</a></p>
+                    <p>Your team is waiting for: <a href="{% url 'project_details_url' %}?id={{ user_team_applied_project.id }}">{{ user_team_applied_project.name }}</a></p>
                 </div>
                 <div class="list-group">
-                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                    <a href="{% url 'project_details_url' %}?id={{ user_team_applied_project.id }}" class="list-group-item">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View your project</a>
                     <a href="{% url 'projects_list_url' %}" class="list-group-item">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Choose another project</a>
@@ -56,7 +56,7 @@
                 <div class="panel-heading"><b>Team</b></div>
                 {% if has_user_team %}
                 <div class="panel-body">
-                    <p>You are assigned to: <a href="{% url 'teams_list_url' %}">{{ request.user.team.name }}</a></p>
+                    <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name }}</a></p>
                 </div>
                 <div class="list-group">
                     <a href="{% url 'team_leave_url' %}" class="list-group-item">
