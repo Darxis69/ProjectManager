@@ -22,7 +22,7 @@ class AccountChangePasswordForm(forms.Form):
         cleaned_new_password_repeat = self.cleaned_data.get('new_password_repeat')
 
         if cleaned_new_password != cleaned_new_password_repeat:
-            raise ValidationError("Passwords don't match.", code='not_match')
+            self.add_error('new_password_repeat', "Passwords don't match.")
 
         return self.cleaned_data
 
@@ -50,16 +50,16 @@ class AccountCreateForm(forms.Form):
         cleaned_password_repeat = self.cleaned_data.get('password_repeat')
 
         if cleaned_password != cleaned_password_repeat:
-            raise ValidationError("Passwords don't match.", code='not_match')
+            self.add_error('password_repeat', "Passwords don't match.")
 
         cleaned_student_no = self.cleaned_data.get('student_no')
         cleaned_account_type = self.cleaned_data.get('account_type')
 
         if cleaned_account_type == self.ACCOUNT_TYPE_STUDENT:
             if cleaned_student_no == '':
-                raise ValidationError("Student No. required", code='student_no_required')
+                self.add_error('student_no', "Student No. required.")
             if not cleaned_student_no.isdigit():
-                raise ValidationError("Student No. must be a number", code='student_no_not_number')
+                self.add_error('student_no', "Student No. must be a number")
 
         return self.cleaned_data
 
