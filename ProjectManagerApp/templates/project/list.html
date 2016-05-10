@@ -33,7 +33,7 @@
                                             <a href="{% url 'teams_list_url' %}">{{ project.assigned_team.name }}</a>
                                         {% elif project.all_teams %}
                                             {% for team in project.all_teams.all %}
-                                                <a href="{% url 'teams_list_url' %}">{{ team.name }}</a>
+                                                <a href="{% url 'team_details_url' %}?id={{ team.id }}">{{ team.name }}</a>
                                             {% endfor %}
                                         {% else %}
                                             None
