@@ -22,7 +22,7 @@
                 <div class="panel-heading"><b>Project</b></div>
                 {% if user_team_assigned_project %}
                 <div class="panel-body">
-                    <p>Your team is assigned to: <a href="{% url 'project_details_url' %}?id={{ user_team_assigned_project.id }}">{{ user_team_assigned_project.name }}</a></p>
+                    <p>Your team is assigned to: <a href="{% url 'project_details_url' %}?id={{ user_team_assigned_project.id }}">{{ user_team_assigned_project.name|truncatechars:max_field_length }}</a></p>
                 </div>
                 <div class="list-group">
                     <a href="{% url 'projects_list_url' %}" class="list-group-item">
@@ -32,7 +32,7 @@
                 </div>
                 {% elif user_team_applied_project %}
                 <div class="panel-body">
-                    <p>Your team is waiting for: <a href="{% url 'project_details_url' %}?id={{ user_team_applied_project.id }}">{{ user_team_applied_project.name }}</a></p>
+                    <p>Your team is waiting for: <a href="{% url 'project_details_url' %}?id={{ user_team_applied_project.id }}">{{ user_team_applied_project.name|truncatechars:max_field_length }}</a></p>
                 </div>
                 <div class="list-group">
                     <a href="{% url 'project_details_url' %}?id={{ user_team_applied_project.id }}" class="list-group-item">
@@ -58,7 +58,7 @@
             <div class="panel-heading"><b>Team</b></div>
             {% if has_user_team %}
             <div class="panel-body">
-                <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name }}</a></p>
+                <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name|truncatechars:max_field_length }}</a></p>
             </div>
             <div class="list-group">
                 <a href="{% url 'team_leave_url' %}" class="list-group-item" name="team_leave_link">

@@ -45,3 +45,7 @@ def teams(request):
 
 def projects(request):
     return {'projects': Project.objects.all()}
+
+
+def max_field_length(request):
+    return {'max_field_length': 15}
