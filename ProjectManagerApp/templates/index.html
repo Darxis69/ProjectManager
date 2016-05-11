@@ -54,30 +54,33 @@
             </div>
     </div>
     <div class="col-md-4">
-            <div class="panel panel-info">
-                <div class="panel-heading"><b>Team</b></div>
-                {% if has_user_team %}
-                <div class="panel-body">
-                    <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name }}</a></p>
-                </div>
-                <div class="list-group">
-                    <a href="{% url 'team_leave_url' %}" class="list-group-item">
-                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Leave your team</a>
-                    <a href="{% url 'teams_list_url' %}" class="list-group-item">
-                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all teams</a>
-                </div>
-                {% else %}
-                <div class="panel-body">
-                    <p>You have no team yet.</p>
-                </div>
-                <div class="list-group">
-                    <a href="{% url 'team_create_url' %}" class="list-group-item">
-                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Create your own team</a>
-                    <a href="{% url 'teams_list_url' %}" class="list-group-item">
-                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Join an existing team</a>
-                </div>
-                {% endif %}
+        <div class="panel panel-info">
+            <div class="panel-heading"><b>Team</b></div>
+            {% if has_user_team %}
+            <div class="panel-body">
+                <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name }}</a></p>
             </div>
+            <div class="list-group">
+                <a href="{% url 'team_leave_url' %}" class="list-group-item" name="team_leave_link">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Leave your team</a>
+                <a href="{% url 'teams_list_url' %}" class="list-group-item">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all teams</a>
+            </div>
+            {% else %}
+            <div class="panel-body">
+                <p>You have no team yet.</p>
+            </div>
+            <div class="list-group">
+                <a href="{% url 'team_create_url' %}" class="list-group-item">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Create your own team</a>
+                <a href="{% url 'teams_list_url' %}" class="list-group-item">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Join an existing team</a>
+            </div>
+            {% endif %}
+        </div>
+        <script>
+            makeConfirmableLinksWithMessage($("a[name='team_leave_link']"), "Are you sure you want to leave your team?");
+        </script>
     </div>
 </div>
 {% elif is_teacher %}

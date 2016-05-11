@@ -71,7 +71,7 @@
                             </tbody>
                         </table>
                         <script>
-                            makeConfirmableForms($("form[name='project_delete_form']"), "Are you sure you want to delete this project?");
+                            makeConfirmableFormsWithMessage($("form[name='project_delete_form']"), "Are you sure you want to delete this project?");
                         </script>
                     </div>
                 {% else %}
