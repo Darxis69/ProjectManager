@@ -1,7 +1,7 @@
 function makeConfirmableForms(forms) {
-    makeConfirmableForms(forms, "Are you sure?");
+    makeConfirmableFormsWithMessage(forms, "Are you sure?");
 }
-function makeConfirmableForms(forms, confirmationMessage) {
+function makeConfirmableFormsWithMessage(forms, confirmationMessage) {
     $(forms).submit(function(e) {
         var currentForm = this;
         e.preventDefault();
