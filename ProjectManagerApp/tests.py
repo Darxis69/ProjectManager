@@ -64,6 +64,62 @@ class CreateUsersServicesTests(TestCase):
             account_create_teacher("test_student_username1", "test2@mail.com", "test_pass")
 
 
+class ManageUsersServicesTests(TestCase):
+
+    new_password = "new_password"
+    new_stud_email = "new_stud@mail.com"
+    new_teach_email = "new_teach@mail.com"
+
+    def setUp(self):
+        stud = Student(username='student_username', email="student@mail.com", student_no=1111)
+        stud.set_password('student_password')
+        stud.save()
+
+        teach = Teacher(username='teacher_username', email="teacher@mail.com")
+        teach.set_password('teacher_password')
+        teach.save()
+
+    def test_user_change_password(self):
+        teacher = Teacher.objects.get(username='teacher_username')
+        student = Student.objects.get(username='student_username')
+
+        user_change_password(student, "student_password", self.new_password)
+        self.assertTrue(student.check_password(self.new_password))
+
+        user_change_password(teacher, "teacher_password", self.new_password)
+        self.assertTrue(teacher.check_password(self.new_password))
+
+    def test_user_change_password_wrong_pass(self):
+        teacher = Teacher.objects.get(username='teacher_username')
+        student = Student.objects.get(username='student_username')
+
+        with self.assertRaisesMessage(InvalidPassword, ""):
+            user_change_password(student, "wrong_password", self.new_password)
+
+        with self.assertRaisesMessage(InvalidPassword, ""):
+            user_change_password(teacher, "wrong_password", self.new_password)
+
+    def test_user_change_email(self):
+        teacher = Teacher.objects.get(username='teacher_username')
+        student = Student.objects.get(username='student_username')
+
+        user_change_email(student, self.new_stud_email)
+        self.assertEqual(student.email, self.new_stud_email)
+
+        user_change_email(teacher, self.new_teach_email)
+        self.assertEqual(teacher.email, self.new_teach_email)
+
+    def test_user_change_email_already_exist(self):
+        teacher = Teacher.objects.get(username='teacher_username')
+        student = Student.objects.get(username='student_username')
+
+        with self.assertRaisesMessage(UserWithGivenEmailAlreadyExists, ""):
+            user_change_email(student, "student@mail.com")
+
+        with self.assertRaisesMessage(UserWithGivenEmailAlreadyExists, ""):
+            user_change_email(teacher, "student@mail.com")
+
+
 class ManageTeamsServicesTests(TestCase):
 
     def test_create_team(self):
@@ -204,8 +260,6 @@ class ManageProjectsServicesTests(TestCase):
 
     def test_create_project_as_student(self):
         user = Student()
-        # project_name = "test_project_name"
-        # project_descripton = "test_project_descrption"
 
         with self.assertRaisesMessage(MustBeTeacher, ""):
             user_create_project(user, self.project_name, self.project_descripton)
@@ -260,10 +314,6 @@ class ManageProjectsServicesTests(TestCase):
 
         self.assertTrue(Project.objects.filter(name=self.project_name).exists())
 
-        # user2 = Student()
-        # team = Team(first_teammate=user2)
-        # user2.team = team
-
         account_create_student("1234", "test_student_username", "test@mail.com", "test_pass")
 
         self.assertTrue(Student.objects.filter(username='test_student_username', email='test@mail.com').exists())
@@ -308,11 +358,11 @@ class ManageProjectsServicesTests(TestCase):
 class ViewsTests(TestCase):
 
     def setUp(self):
-        stud = Student(username='student_username', student_no=1111)
+        stud = Student(username='student_username', email="student@mail.com", student_no=1111)
         stud.set_password('student_password')
         stud.save()
 
-        teach = Teacher(username='teacher_username')
+        teach = Teacher(username='teacher_username', email="teacher@mail.com")
         teach.set_password('teacher_password')
         teach.save()
 
@@ -444,6 +494,19 @@ class ViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'User with given username already exists.')
 
+    def test_account_create_from_view_with_the_same_email(self):
+        response = self.client.get('/account/create/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/create/',{ 'username': 'test_stud_username',
+                                                         'email': 'student@mail.com',
+                                                         'password': "test_pass",
+                                                         'password_repeat': "test_pass",
+                                                         'account_type': "2"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'User with given email already exists.')
+
     def test_student_account_create_from_view_with_the_same_student_no(self):
         response = self.client.get('/account/create/')
         self.assertEqual(response.status_code, 200)
@@ -457,6 +520,7 @@ class ViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Student with given student no already exists.')
+
 
     # TODO
     def test_account_create_from_view_with_wrong_forms(self):
