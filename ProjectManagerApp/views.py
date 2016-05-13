@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout, \
     update_session_auth_hash
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
@@ -14,7 +14,7 @@ from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserN
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, \
     AccountChangeEmailForm, AccountChangePasswordForm
-from ProjectManagerApp.models import Project, Team
+from ProjectManagerApp.models import Project, Team, Student, Teacher
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
     user_create_project, user_team_join_project, account_create_teacher, account_create_student, \
     user_team_leave_project, user_change_email, user_change_password
@@ -217,6 +217,7 @@ class TeamListView(TemplateView):
 
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(lambda u: isinstance(u, Student)), name='dispatch')
 class TeamCreateFormView(FormView):
     template_name = 'team/create.html'
     form_class = TeamCreateForm
@@ -254,6 +255,7 @@ class TeamCreateFormView(FormView):
 
 @require_http_methods(["POST"])
 @login_required
+@user_passes_test(lambda u: isinstance(u, Student))
 def team_join(request):
     try:
         team = Team.objects.get(id=request.POST.get('team_id'))
@@ -288,6 +290,7 @@ class TeamDetailsView(TemplateView):
 
 
 @login_required
+@user_passes_test(lambda u: isinstance(u, Student))
 def team_leave(request):
     try:
         user_team_leave(request.user)
@@ -317,6 +320,7 @@ class ProjectListView(TemplateView):
 
 
 @method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(lambda u: isinstance(u, Teacher)), name='dispatch')
 class ProjectCreateFormView(FormView):
     template_name = 'project/create.html'
     form_class = ProjectCreateForm
@@ -351,6 +355,7 @@ class ProjectCreateFormView(FormView):
 
 @require_http_methods(["POST"])
 @login_required
+@user_passes_test(lambda u: isinstance(u, Student))
 def project_join(request):
     try:
         project = Project.objects.get(pk=request.POST.get('project_id'))
@@ -378,6 +383,7 @@ def project_join(request):
 
 @require_http_methods(["POST"])
 @login_required
+@user_passes_test(lambda u: isinstance(u, Student))
 def project_leave(request):
     try:
         project = Project.objects.get(pk=request.POST.get('project_id'))
@@ -419,6 +425,7 @@ class ProjectDetailsView(TemplateView):
 
 @require_http_methods(["POST"])
 @login_required
+@user_passes_test(lambda u: isinstance(u, Teacher))
 def project_delete(request):
     try:
         project = Project.objects.get(pk=request.POST.get('project_id'))
