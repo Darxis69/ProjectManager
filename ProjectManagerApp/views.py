@@ -1,11 +1,11 @@
+from django.contrib import messages
 from django.contrib.auth import authenticate as auth_authenticate, login as auth_login, logout as auth_logout, \
     update_session_auth_hash
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.utils.decorators import method_decorator
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 
@@ -253,7 +253,7 @@ class TeamCreateFormView(FormView):
         return render(request, self.template_name, self.create_context_data(team_create_form))
 
 
-@require_http_methods(["POST"])
+@require_POST
 @login_required
 @user_passes_test(lambda u: isinstance(u, Student))
 def team_join(request):
@@ -353,7 +353,7 @@ class ProjectCreateFormView(FormView):
         return render(request, self.template_name, self.create_context_data(project_create_form))
 
 
-@require_http_methods(["POST"])
+@require_POST
 @login_required
 @user_passes_test(lambda u: isinstance(u, Student))
 def project_join(request):
@@ -381,7 +381,7 @@ def project_join(request):
     return redirect(reverse('projects_list_url'))
 
 
-@require_http_methods(["POST"])
+@require_POST
 @login_required
 @user_passes_test(lambda u: isinstance(u, Student))
 def project_leave(request):
@@ -423,7 +423,7 @@ class ProjectDetailsView(TemplateView):
         return render(request, self.template_name, {'project': project})
 
 
-@require_http_methods(["POST"])
+@require_POST
 @login_required
 @user_passes_test(lambda u: isinstance(u, Teacher))
 def project_delete(request):
