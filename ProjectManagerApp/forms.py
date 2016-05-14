@@ -3,12 +3,12 @@ from django.forms import PasswordInput
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(label='Username')
+    username = forms.CharField(label='Username', max_length=30)
     password = forms.CharField(label='Password', widget=PasswordInput())
 
 
 class AccountChangeEmailForm(forms.Form):
-    new_email = forms.EmailField(label='New email')
+    new_email = forms.EmailField(label='New email', max_length=64)
 
 
 class AccountChangePasswordForm(forms.Form):
@@ -37,12 +37,12 @@ class AccountCreateForm(forms.Form):
         (ACCOUNT_TYPE_STAFF, ACCOUNT_TYPE_STAFF_LABEL),
     )
 
-    username = forms.CharField(label='Username')
-    email = forms.EmailField(label="Email")
+    username = forms.CharField(label='Username', max_length=30)
+    email = forms.EmailField(label="Email", max_length=64)
     password = forms.CharField(label='Password', widget=PasswordInput())
     password_repeat = forms.CharField(label='Password repeat', widget=PasswordInput())
     account_type = forms.ChoiceField(choices=ACCOUNT_TYPES)
-    student_no = forms.CharField(label='Student No.', required=False)
+    student_no = forms.CharField(label='Student No.', required=False, max_length=9)
 
     def clean(self):
         cleaned_password = self.cleaned_data.get('password')
@@ -64,9 +64,9 @@ class AccountCreateForm(forms.Form):
 
 
 class ProjectCreateForm(forms.Form):
-    name = forms.CharField(label='Project name')
-    description = forms.CharField(label="Description", widget=forms.Textarea)
+    name = forms.CharField(label='Project name', max_length=50)
+    description = forms.CharField(label="Description", widget=forms.Textarea, max_length=4096)
 
 
 class TeamCreateForm(forms.Form):
-    name = forms.CharField(label='Team name')
+    name = forms.CharField(label='Team name', max_length=50)
