@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, handler404
 
 from ProjectManagerApp.views import LoginFormView, AccountCreateFormView, ProjectCreateFormView, IndexView, \
     TeamCreateFormView, TeamListView, ProjectListView
@@ -23,5 +23,6 @@ urlpatterns = [
     url(r'^teams/create/$', TeamCreateFormView.as_view(), name="team_create_url"),
     url(r'^teams/join/$', views.team_join, name="team_join_url"),
     url(r'^teams/leave/$', views.team_leave, name="team_leave_url"),
-    url(r'^teams/details/$', views.TeamDetailsView.as_view(), name="team_details_url")
+    url(r'^teams/details/$', views.TeamDetailsView.as_view(), name="team_details_url"),
+    url(r'^.*/$', views.handler404, name='error_404_url'),
 ]
