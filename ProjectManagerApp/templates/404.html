@@ -1,0 +1,10 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
+{% block content %}
+    Error 404: Page not found.
+    You are going to be redirected to the main page.
+    <script type="text/javascript">
+        $url = "{% url 'index_url' %}";
+        setTimeout("top.location.href = '" + $url + "'", 5000);
+    </script>
+{% endblock %}

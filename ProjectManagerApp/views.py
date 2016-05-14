@@ -444,3 +444,7 @@ def project_delete(request):
 
     messages.add_message(request, messages.INFO, 'Project deleted.')
     return redirect(reverse('projects_list_url'))
+
+
+def handler404(request):
+    return render(request, '404.html')
