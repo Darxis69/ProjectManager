@@ -447,4 +447,4 @@ def project_delete(request):
 
 
 def handler404(request):
-    return render(request, '404.html')
+    return render(request, 'http_error.html', {'error_code': 404, 'error_message': 'Page not found'})

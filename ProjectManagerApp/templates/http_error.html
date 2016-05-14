@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% load bootstrap3 %}
 {% block content %}
-    Error 405: Method not allowed.
-    You are going to be redirected to the main page.
+    <div>Error {{ error_code }}: {{ error_message }}.</div>
+    <div>You are going to be redirected to the main page.</div>
     <script type="text/javascript">
         $url = "{% url 'index_url' %}";
         setTimeout("top.location.href = '" + $url + "'", 5000);
