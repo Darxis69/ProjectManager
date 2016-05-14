@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
+{% block content %}
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <div class="panel-title">Team details</div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'teams_list_url' %}">Return to all teams</a></div>
+            </div>
+            <div class="panel-body">
+                <p>Name: {{ team.name }}</p>
+                <p>First student: {{ team.first_teammate }}</p>
+                <p>Second student: {{ team.second_teammate }}</p>
+                <p>Assigned project: {% if team.project %}<a href="{% url "project_details_url" %}?id={{ team.project.id }}">{{ team.project.name }}</a>{% else %}None{% endif %}</p>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}

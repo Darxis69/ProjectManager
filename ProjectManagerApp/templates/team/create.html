@@ -4,15 +4,15 @@
     <div class="col-md-6 col-md-offset-3">
         <div class="panel panel-info">
             <div class="panel-heading">
-                <div class="panel-title">Create project</div>
-                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'projects_list_url' %}">Return to all projects</a></div>
+                <div class="panel-title">Create team</div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'teams_list_url' %}">Return to all teams</a></div>
             </div>
             <div class="panel-body">
-                <form action="{% url 'project_create_url' %}" method="POST" class="form">
+                <form action="{% url 'team_create_url' %}" method="POST" class="form">
                     {% csrf_token %}
-                    {% bootstrap_form project_create_form %}
+                    {% bootstrap_form team_create_form %}
                     {% buttons %}
-                        <a href="{% url 'projects_list_url' %}">{% bootstrap_button "Cancel" button_type="button" button_class="btn btn-default" %}</a>
+                        <a href="{% url 'teams_list_url' %}">{% bootstrap_button "Cancel" button_type="button" button_class="btn btn-default" %}</a>
                         {% bootstrap_button "Create" button_type="submit" button_class="btn btn-primary pull-right" %}
                     {% endbuttons %}
                 </form>

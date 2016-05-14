@@ -1,0 +1,66 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
+{% block content %}
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <div class="panel-title">List of all teams</div>
+                {% if is_student and not has_user_team %}
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'team_create_url' %}">Create team</a></div>
+                {% endif %}
+            </div>
+            <div class="panel-body">
+                {% if teams %}
+                    <div class="table">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Team name</th>
+                                    <th>First student</th>
+                                    <th>Second student</th>
+                                    {% if is_student %}
+                                    <th>Actions</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for team in teams %}
+                                <tr>
+                                    <td><a href="{% url 'team_details_url' %}?id={{ team.id }}">{{ team.name|truncatechars:max_field_length }}</a></td>
+                                    <td>{{ team.first_teammate }}</td>
+                                    <td>{{ team.second_teammate }}</td>
+                                    {% if is_student %}
+                                    <td align="center">
+                                        {% if request.user == team.first_teammate or request.user == team.second_teammate %}
+                                            <form method="post" action="{% url 'team_leave_url' %}" name="team_leave_form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="team_id" value="{{ team.id }}" />
+                                                <button type="submit" class="btn btn-danger" >
+                                                    <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
+                                                </button>
+                                            </form>
+                                        {% elif not has_user_team %}
+                                            <form method="post" action="{% url 'team_join_url' %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary" name="team_id" value={{ team.id }}>
+                                                    <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                        <script>
+                            makeConfirmableFormsWithMessage($("form[name='team_leave_form']"), "Are you sure you want to leave this team?");
+                        </script>
+                    </div>
+                {% else %}
+                    <p>No teams found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

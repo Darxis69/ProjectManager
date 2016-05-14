@@ -11,12 +11,24 @@ class Teacher(UserBase):
 
 
 class Student(UserBase):
-    student_no = models.IntegerField()
+    STUDENT_STATUS_UNASSIGNED = 'U'
+    STUDENT_STATUS_UNASSIGNED_LABEL = 'Unassigned'
+    STUDENT_STATUS_ASSIGNED = 'A'
+    STUDENT_STATUS_ASSIGNED_LABEL = 'Assigned'
+    STUDENT_STATUS = (
+         (STUDENT_STATUS_UNASSIGNED, STUDENT_STATUS_UNASSIGNED_LABEL),
+         (STUDENT_STATUS_ASSIGNED, STUDENT_STATUS_ASSIGNED_LABEL)
+     )
 
+    student_no = models.IntegerField(unique=True)
+    team = models.ForeignKey('Team', null=True, related_name='+', on_delete=models.SET_NULL, unique=False)
+    status = models.CharField(max_length=1, choices=STUDENT_STATUS)
+    
 
 class Team(models.Model):
-    first_teammate = models.ForeignKey(Student, null=True, related_name="first_student", on_delete=models.SET_NULL)
-    second_teammate = models.ForeignKey(Student, null=True, related_name="second_student", on_delete=models.SET_NULL)
+    name = models.CharField(max_length=50)
+    first_teammate = models.OneToOneField(Student, null=True, related_name='+', on_delete=models.SET_NULL, unique=True)
+    second_teammate = models.OneToOneField(Student, null=True, related_name='+', on_delete=models.SET_NULL, unique=True)
 
 
 class Project(models.Model):
@@ -30,7 +42,8 @@ class Project(models.Model):
      )
 
     name = models.CharField(max_length=50)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=4096)
     status = models.CharField(max_length=1, choices=PROJECT_STATUS)
-    assigned_team = models.OneToOneField(Team, null=True, on_delete=models.SET_NULL)
-    author = models.ForeignKey(Teacher, null=False, related_name="author", on_delete=models.CASCADE)
+    assigned_team = models.OneToOneField(Team, null=True, related_name="project", on_delete=models.SET_NULL)
+    all_teams = models.ManyToManyField(Team, related_name="+")
+    author = models.ForeignKey(Teacher, null=False, related_name="+", on_delete=models.CASCADE)

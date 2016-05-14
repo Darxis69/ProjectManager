@@ -51,6 +51,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'ProjectManagerApp.middleware.HttpResponseNotAllowedMiddleware',
 ]
 
 ROOT_URLCONF = 'ProjectManager.urls'
@@ -68,6 +69,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ProjectManagerApp.context_processors.is_student',
+                'ProjectManagerApp.context_processors.is_teacher',
+                'ProjectManagerApp.context_processors.has_user_team',
+                'ProjectManagerApp.context_processors.teams_count',
+                'ProjectManagerApp.context_processors.projects_count',
+                'ProjectManagerApp.context_processors.user_team_assigned_project',
+                'ProjectManagerApp.context_processors.user_team_applied_project',
+                'ProjectManagerApp.context_processors.max_field_length'
             ],
         },
     },
@@ -87,6 +96,7 @@ DATABASES = {
         'PASSWORD': 'qweasd123!@#',
         'HOST': '127.0.0.1',
         'PORT': '',
+        'ATOMIC_REQUESTS': True,
     }
 }
 
@@ -136,3 +146,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGIN_URL = '/account/login/'
+
+# Messages configuration
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

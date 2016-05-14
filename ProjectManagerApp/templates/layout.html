@@ -8,10 +8,11 @@
     <title>{% block title %}{% endblock title %}</title>
     {% block extrahead %}
         <script type="text/javascript" src="{% static "js/jquery.js" %}"></script>
+        <script type="text/javascript" src="{% static "js/bootbox.min.js" %}"></script>
+        <script type="text/javascript" src="{% static "js/scripts.js" %}"></script>
     {% endblock %}
     {% bootstrap_css %}
     {% bootstrap_javascript %}
-    {% bootstrap_messages %}
 </head>
 <body>
 
@@ -25,44 +26,61 @@
                 <span class="icon-bar"></span>
             </button>
 
-            <a href="#" class="navbar-brand">Project manager</a>
+            <a href="{% url 'index_url' %}" class="navbar-brand">Project manager</a>
         </div>
         <div class="collapse navbar-collapse" id="navbar">
             <ul class="nav navbar-nav">
                 {% if user.is_authenticated %}
-                    <li class="active"><a href="/index">Home</a></li>
-                    <li><a href="/projects">Projects</a></li>
-                    <li><a href="/teams">Teams</a></li>
-                    <!--<li class="dropdown">
-                      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-                      <ul class="dropdown-menu">
-                        <li><a href="#">Action</a></li>
-                        <li><a href="#">Another action</a></li>
-                        <li><a href="#">Something else here</a></li>
-                        <li role="separator" class="divider"></li>
-                        <li class="dropdown-header">Nav header</li>
-                        <li><a href="#">Separated link</a></li>
-                        <li><a href="#">One more separated link</a></li>
-                      </ul>
-                    </li>-->
+                    <li class="active"><a href="{% url 'index_url' %}">Home</a></li>
+                    <li class="dropdown">
+                        <a href="{% url 'projects_list_url' %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Projects<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            {% if not is_student  %}
+                                <li><a href="{% url 'project_create_url' %}">Create</a></li>
+                                <li role="separator" class="divider"></li>
+                            {% endif %}
+                            <li><a href="{% url 'projects_list_url' %}">List</a></li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="{% url 'teams_list_url' %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Teams<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            {% if is_student  %}
+                                <li><a href="{% url 'team_create_url' %}">Create</a></li>
+                                <li role="separator" class="divider"></li>
+                            {% endif %}
+                            <li><a href="{% url 'teams_list_url' %}">List</a></li>
+                        </ul>
+                    </li>
                 {% endif %}
             </ul>
 
             <ul class="nav navbar-nav navbar-right" role="navigation">
                 {% if not user.is_authenticated  %}
-                    <li><a href="/account/login">Login</a></li>
-                    <li><a href="/account/create">Create account</a></li>
+                    <li><a href="{% url 'account_login_url' %}">Login</a></li>
+                    <li><a href="{% url 'account_create_url' %}">Create account</a></li>
                 {% else %}
-                    <li><a href="/account">My account</a></li>
-                    <li><a href="/account/logout">Logout</a></li>
+                    {% comment %}
+                    <li><a href="{% url 'account' %}">My account</a></li>
+                    {% endcomment %}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ request.user }}<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'account_details_url' %}">Account details</a></li>
+                            <li><a href="{% url 'account_change_email_url' %}">Change email</a></li>
+                            <li><a href="{% url 'account_change_password_url' %}">Change password</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{% url 'account_logout_url' %}">Logout</a></li>
                 {% endif %}
             </ul>
         </div>
     </div>
 </nav>
 <div class="container" style="padding: 80px">
-{% block content %}
-{% endblock %}
+    {% bootstrap_messages %}
+    {% block content %}
+    {% endblock %}
 </div>
 </body>
 </html>

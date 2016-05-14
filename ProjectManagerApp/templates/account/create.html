@@ -7,7 +7,7 @@
                 <div class="panel-title">Create account</div>
             </div>
             <div class="panel-body">
-                <form action="/account/create/" method="POST" class="form">
+                <form action="{% url 'account_create_url' %}" method="POST" class="form">
                     {% csrf_token %}
                     {% bootstrap_form account_create_form %}
                     {% buttons %}
@@ -15,15 +15,18 @@
                     {% endbuttons %}
                 </form>
                 <script type="text/javascript">
+                    function account_type_update_form() {
+                        if ($('#id_account_type').val() == '1') {
+                            $("#id_student_no").closest("div").show();
+                        }
+                        else {
+                            $("#id_student_no").closest("div").hide();
+                        }
+                    }
+
                     $(document).ready(function() {
-                        $('#id_account_type').on('change', function() {
-                            if ( this.value == '1') {
-                                $("#id_student_no").closest("div").show();
-                            }
-                            else {
-                                $("#id_student_no").closest("div").hide();
-                            }
-                        });
+                        $('#id_account_type').on('change', account_type_update_form);
+                        account_type_update_form();
                     });
                 </script>
             </div>

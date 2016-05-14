@@ -1,9 +1,118 @@
 {% extends "layout.html" %}
 {% load bootstrap3 %}
 {% block content %}
-    <div class="col-md-6 col-md-offset-3">
-        <span>
-            Hello World!
-        </span>
+{% if is_student %}
+<div class="row">
+    <div class="col-md-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><b>Home</b></div>
+                <div class="panel-body">
+                    <p>Here you can view all projects and teams.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Projects <span class="badge">{{ projects_count }}</span></a>
+                    <a href="{% url 'teams_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Teams <span class="badge">{{ teams_count }}</span></a>
+                </div>
+            </div>
     </div>
+    <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading"><b>Project</b></div>
+                {% if user_team_assigned_project %}
+                <div class="panel-body">
+                    <p>Your team is assigned to: <a href="{% url 'project_details_url' %}?id={{ user_team_assigned_project.id }}">{{ user_team_assigned_project.name|truncatechars:max_field_length }}</a></p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View your project</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all projects</a>
+                </div>
+                {% elif user_team_applied_project %}
+                <div class="panel-body">
+                    <p>Your team is waiting for: <a href="{% url 'project_details_url' %}?id={{ user_team_applied_project.id }}">{{ user_team_applied_project.name|truncatechars:max_field_length }}</a></p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'project_details_url' %}?id={{ user_team_applied_project.id }}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View your project</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Choose another project</a>
+                </div>
+                {% else %}
+                <div class="panel-body">
+                    <p>Your team is not assigned to any project.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Add your team to a project</a>
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all projects</a>
+                </div>
+                {% endif %}
+            </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-info">
+            <div class="panel-heading"><b>Team</b></div>
+            {% if has_user_team %}
+            <div class="panel-body">
+                <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name|truncatechars:max_field_length }}</a></p>
+            </div>
+            <div class="list-group">
+                <a href="{% url 'team_leave_url' %}" class="list-group-item" name="team_leave_link">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Leave your team</a>
+                <a href="{% url 'teams_list_url' %}" class="list-group-item">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all teams</a>
+            </div>
+            {% else %}
+            <div class="panel-body">
+                <p>You have no team yet.</p>
+            </div>
+            <div class="list-group">
+                <a href="{% url 'team_create_url' %}" class="list-group-item">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Create your own team</a>
+                <a href="{% url 'teams_list_url' %}" class="list-group-item">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Join an existing team</a>
+            </div>
+            {% endif %}
+        </div>
+        <script>
+            makeConfirmableLinksWithMessage($("a[name='team_leave_link']"), "Are you sure you want to leave your team?");
+        </script>
+    </div>
+</div>
+{% elif is_teacher %}
+<div class="row">
+    <div class="col-md-4 col-md-offset-2">
+            <div class="panel panel-primary">
+                <div class="panel-heading"><b>Home</b></div>
+                <div class="panel-body">
+                    <p>Here you can view all projects and teams.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'projects_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all projects <span class="badge">{{ projects_count }}</span></a>
+                    <a href="{% url 'teams_list_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all teams <span class="badge">{{ teams_count }}</span></a>
+                </div>
+            </div>
+    </div>
+    <div class="col-md-4">
+            <div class="panel panel-success">
+                <div class="panel-heading"><b>Projects</b></div>
+                <div class="panel-body">
+                    <p>Here you can manage your projects.</p>
+                </div>
+                <div class="list-group">
+                    <a href="{% url 'project_create_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Create a new project</a>
+                    <a href="{% url 'index_url' %}" class="list-group-item">
+                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Assign teams to projects</a>
+                </div>
+            </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}
