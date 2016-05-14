@@ -54,7 +54,7 @@ class AccountCreateForm(forms.Form):
         cleaned_student_no = self.cleaned_data.get('student_no')
         cleaned_account_type = self.cleaned_data.get('account_type')
 
-        if cleaned_account_type == self.ACCOUNT_TYPE_STUDENT:
+        if cleaned_account_type == self.ACCOUNT_TYPE_STUDENT and cleaned_student_no is not None:
             if cleaned_student_no == '':
                 self.add_error('student_no', "Student No. required.")
             if not cleaned_student_no.isdigit():
