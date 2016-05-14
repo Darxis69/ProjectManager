@@ -92,6 +92,12 @@ WSGIPythonPath /var/www/ProjectManager
 ## Deployment to production
 Copy {PROJECT_DIR} to directory /var/www/
 
+## Example configuration of settings.py
+```
+DEBUG = False
+ALLOWED_HOSTS = ["localhost", "www.somehost.com"]
+```
+
 ## Restart apache
 ```
 $sudo service apache2 restart
