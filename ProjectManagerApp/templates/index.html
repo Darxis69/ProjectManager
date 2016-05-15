@@ -108,10 +108,13 @@
                 <div class="list-group">
                     <a href="{% url 'project_create_url' %}" class="list-group-item">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Create a new project</a>
-                    <a href="{% url 'index_url' %}" class="list-group-item">
+                    <a href="{% url 'team_assign_url' %}" class="list-group-item" name="assign_teams_link">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Assign teams to projects</a>
                 </div>
             </div>
+        <script>
+            makeConfirmableLinksWithMessage($("a[name='assign_teams_link']"), "Are you sure you want to assign teams now?");
+        </script>
     </div>
 </div>
 {% endif %}

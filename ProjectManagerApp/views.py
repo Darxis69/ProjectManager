@@ -17,7 +17,7 @@ from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateF
 from ProjectManagerApp.models import Project, Team, Student, Teacher
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
     user_create_project, user_team_join_project, account_create_teacher, account_create_student, \
-    user_team_leave_project, user_change_email, user_change_password
+    user_team_leave_project, user_change_email, user_change_password, assign_teams_to_projects
 
 
 class AccountCreateFormView(FormView):
@@ -273,6 +273,19 @@ def team_join(request):
         return redirect(reverse('teams_list_url'))
 
     return redirect(reverse('teams_list_url'))
+
+
+@login_required
+@user_passes_test(lambda u: isinstance(u, Teacher))
+def team_assign(request):
+    try:
+        assign_teams_to_projects(request.user)
+    except MustBeTeacher:
+        messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
+        return redirect(reverse('index_url'))
+
+    messages.add_message(request, messages.INFO, 'Teams were assigned to projects.')
+    return redirect(reverse('projects_list_url'))
 
 
 @method_decorator(login_required, name='dispatch')

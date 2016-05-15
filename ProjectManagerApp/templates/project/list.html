@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load bootstrap3 %}
 {% block content %}
-    <div class="col-md-6 col-md-offset-3">
+    <div class="col-md-8 col-md-offset-2">
         <div class="panel panel-info">
             <div class="panel-heading">
                 <div class="panel-title">List of all projects</div>
@@ -16,11 +16,8 @@
                             <thead>
                                 <tr>
                                     <th>Project name</th>
-                                    {% if project.assigned_team %}
-                                        <th>Assigned team</th>
-                                    {% else %}
-                                        <th>Waiting teams</th>
-                                    {% endif %}
+                                    <th>Assigned team</th>
+                                    <th>Waiting teams</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -31,7 +28,12 @@
                                     <td>
                                         {% if project.assigned_team %}
                                             <a href="{% url 'teams_list_url' %}">{{ project.assigned_team.name|truncatechars:max_field_length }}</a>
-                                        {% elif project.all_teams %}
+                                        {% else %}
+                                            None
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if project.all_teams.count %}
                                             {% for team in project.all_teams.all %}
                                                 <a href="{% url 'team_details_url' %}?id={{ team.id }}">{{ team.name|truncatechars:max_field_length }}</a><br/>
                                             {% endfor %}
@@ -40,7 +42,7 @@
                                         {% endif %}
                                     </td>
                                     <td align="center">
-                                        {% if is_teacher and not project.aassigned_team %}
+                                        {% if is_teacher and not project.assigned_team %}
                                             <form method="post" action="{% url 'project_delete_url' %}" name="project_delete_form">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="project_id" value="{{ project.id }}" />
@@ -48,7 +50,7 @@
                                                     <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                                                 </button>
                                             </form>
-                                        {% elif is_student and not user_team_assigned_project %}
+                                        {% elif is_student and not user_team_assigned_project and not project.assigned_team %}
                                             {% if not user_team_applied_project and has_user_team %}
                                             <form method="post" action="{% url 'project_join_url' %}">
                                                 {% csrf_token %}

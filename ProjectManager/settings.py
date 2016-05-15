@@ -76,7 +76,8 @@ TEMPLATES = [
                 'ProjectManagerApp.context_processors.projects_count',
                 'ProjectManagerApp.context_processors.user_team_assigned_project',
                 'ProjectManagerApp.context_processors.user_team_applied_project',
-                'ProjectManagerApp.context_processors.max_field_length'
+                'ProjectManagerApp.context_processors.max_field_length',
+                'ProjectManagerApp.context_processors.student_unassigned_status'
             ],
         },
     },

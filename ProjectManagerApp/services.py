@@ -2,6 +2,7 @@ from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserN
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword
 from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
+import random
 
 
 def user_join_team(user, team):
@@ -66,6 +67,29 @@ def user_team_leave(user):
         team.first_teammate.team.refresh_from_db()
 
 
+def assign_team_to_project(project):
+    count = project.all_teams.count()
+    if count:
+        index = random.randint(0, count - 1)
+        result = project.all_teams.all()[index]
+        project.assigned_team = result
+        if result.first_teammate and result.second_teammate:
+            result.first_teammate.status = Student.STUDENT_STATUS_ASSIGNED
+            result.second_teammate.status = Student.STUDENT_STATUS_ASSIGNED
+            for team in project.all_teams.all():
+                project.all_teams.remove(team)
+            project.save(force_update=True)
+
+
+def assign_teams_to_projects(user):
+    if not isinstance(user, Teacher):
+        raise MustBeTeacher
+
+    for project in Project.objects.all():
+        if not project.assigned_team:
+            assign_team_to_project(project)
+
+
 def user_team_join_project(user, project):
     if not isinstance(user, Student):
         raise MustBeStudent
@@ -104,8 +128,9 @@ def user_delete_project(user, project):
     if not isinstance(user, Teacher):
         raise MustBeTeacher
 
-    if project.assigned_team:
-        raise ProjectHasAssignedTeam
+    # TODO only for debugging
+    # if project.assigned_team:
+    #     raise ProjectHasAssignedTeam
 
     project.delete()
 
