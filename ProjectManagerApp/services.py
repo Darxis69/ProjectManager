@@ -128,9 +128,8 @@ def user_delete_project(user, project):
     if not isinstance(user, Teacher):
         raise MustBeTeacher
 
-    # TODO only for debugging
-    # if project.assigned_team:
-    #     raise ProjectHasAssignedTeam
+    if project.assigned_team:
+        raise ProjectHasAssignedTeam
 
     project.delete()
 
