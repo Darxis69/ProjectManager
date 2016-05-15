@@ -48,6 +48,9 @@
                             {% if is_student  %}
                                 <li><a href="{% url 'team_create_url' %}">Create</a></li>
                                 <li role="separator" class="divider"></li>
+                            {% elif is_teacher  %}
+                                <li><a href="{% url 'team_assign_url' %}" name="assign_teams_link">Assign</a></li>
+                                <li role="separator" class="divider"></li>
                             {% endif %}
                             <li><a href="{% url 'teams_list_url' %}">List</a></li>
                         </ul>
@@ -75,6 +78,9 @@
                 {% endif %}
             </ul>
         </div>
+        <script>
+            makeConfirmableLinksWithMessage($("a[name='assign_teams_link']"), "Are you sure you want to assign teams now?");
+        </script>
     </div>
 </nav>
 <div class="container" style="padding: 80px">
