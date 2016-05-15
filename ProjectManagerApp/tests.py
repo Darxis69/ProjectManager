@@ -5,8 +5,6 @@ from django.core.urlresolvers import reverse
 from django.db import IntegrityError
 from .forms import AccountCreateForm
 
-# Create your tests here.
-
 
 class CreateUsersServicesTests(TestCase):
 
@@ -256,13 +254,13 @@ class ManageTeamsServicesTests(TestCase):
 class ManageProjectsServicesTests(TestCase):
 
     project_name = "test_project_name"
-    project_descripton = "test_project_descrption"
+    project_description = "test_project_descrption"
 
     def test_create_project_as_student(self):
         user = Student()
 
         with self.assertRaisesMessage(MustBeTeacher, ""):
-            user_create_project(user, self.project_name, self.project_descripton)
+            user_create_project(user, self.project_name, self.project_description)
 
     def test_delete_project_as_student(self):
         user = Student()
@@ -283,11 +281,11 @@ class ManageProjectsServicesTests(TestCase):
     def test_create_project(self):
         user = Teacher()
         user.save()
-        project = user_create_project(user, self.project_name, self.project_descripton)
+        project = user_create_project(user, self.project_name, self.project_description)
 
         self.assertIsInstance(project, Project)
         self.assertEqual(project.name, self.project_name)
-        self.assertEqual(project.description, self.project_descripton)
+        self.assertEqual(project.description, self.project_description)
         self.assertEqual(project.status, Project.PROJECT_STATUS_OPEN)
         self.assertEqual(project.assigned_team, None)
         self.assertEqual(project.author, user)
@@ -296,7 +294,7 @@ class ManageProjectsServicesTests(TestCase):
     def test_delete_project(self):
         user = Teacher()
         user.save()
-        project = user_create_project(user, self.project_name, self.project_descripton)
+        project = user_create_project(user, self.project_name, self.project_description)
         project.save()
 
         self.assertTrue(Project.objects.filter(name=self.project_name).exists())
@@ -309,7 +307,7 @@ class ManageProjectsServicesTests(TestCase):
     def test_join_project(self):
         user = Teacher()
         user.save()
-        project = user_create_project(user, self.project_name, self.project_descripton)
+        project = user_create_project(user, self.project_name, self.project_description)
         project.save()
 
         self.assertTrue(Project.objects.filter(name=self.project_name).exists())
@@ -334,7 +332,7 @@ class ManageProjectsServicesTests(TestCase):
     def test_join_project_as_a_teacher(self):
         user = Teacher()
         user.save()
-        project = user_create_project(user, self.project_name, self.project_descripton)
+        project = user_create_project(user, self.project_name, self.project_description)
         project.save()
 
         self.assertTrue(Project.objects.filter(name=self.project_name).exists())
@@ -346,13 +344,53 @@ class ManageProjectsServicesTests(TestCase):
     def test_leave_project_as_a_teacher(self):
         user = Teacher()
         user.save()
-        project = user_create_project(user, self.project_name, self.project_descripton)
+        project = user_create_project(user, self.project_name, self.project_description)
         project.save()
 
         self.assertTrue(Project.objects.filter(name=self.project_name).exists())
 
         with self.assertRaisesMessage(MustBeStudent, ""):
             user_team_leave_project(user, project)
+
+    def test_assign_team_to_project(self):
+        user = Teacher()
+        user.save()
+        project = user_create_project(user, self.project_name, self.project_description)
+        project.save()
+
+        student1 = Student(username='student1_username', email="student1@mail.com", student_no=1111)
+        student1.set_password('student1_password')
+        student1.save()
+
+        student2 = Student(username='student2_username', email="student2@mail.com", student_no=1234)
+        student2.set_password('student2_password')
+        student2.save()
+
+        user_create_team(student1, "test_team")
+        user_join_team(student2,student1.team)
+
+        user_team_join_project(student1, project)
+
+        assign_team_to_project(project)
+
+        student1.refresh_from_db()
+        student2.refresh_from_db()
+        project.refresh_from_db()
+
+        self.assertEqual(project.assigned_team, student1.team)
+        self.assertTrue(project.all_teams.count() == 0)
+        print (student1.status)
+        self.assertEqual(project.assigned_team.first_teammate.status, Student.STUDENT_STATUS_ASSIGNED)
+        self.assertEqual(project.assigned_team.second_teammate.status, Student.STUDENT_STATUS_ASSIGNED)
+
+        # TODO
+        # self.assertEqual(student1.status, Student.STUDENT_STATUS_ASSIGNED)
+        # self.assertEqual(student2.status, Student.STUDENT_STATUS_ASSIGNED)
+
+        #TODO
+        # ,pre assign test, more teams etc.
+
+
 
 
 class ViewsTests(TestCase):
@@ -582,6 +620,25 @@ class ViewsTests(TestCase):
         login = self.client.login(username='test_teacher_username', password='test_pass')
 
         self.assertTrue(login)
+
+    def test_change_mail_from_view(self):
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/account/changeEmail/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/changeEmail/',{ 'new_email': 'test@123.pl'})
+        self.assertEqual(response.status_code, 200)
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Email changed.')
+
+
+        self.assertTrue(Student.objects.filter(username='student_username', email='test@123.pl').exists())
+
+        #TODO bad mail
+        #TODO change pass
+
 
     #team view
     #TODO
@@ -1234,5 +1291,3 @@ class FormsTests(TestCase):
                  'student_no': "wrong_number"}
         form = AccountCreateForm(data=data)
         self.assertFalse(form.is_valid())
-
-    #TODO forms for change email etc. tests
