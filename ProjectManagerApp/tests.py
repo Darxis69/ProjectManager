@@ -598,19 +598,28 @@ class ViewsTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'Team created.')
 
-
         self.assertTrue(Team.objects.filter(name='test_team').exists())
+
+    def test_team_create_from_view_with_wrong_forms(self):
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/teams/create/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/teams/create/', {'name': ''}, follow=True)
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(Team.objects.filter(name='').exists())
 
     def test_team_create_from_view_as_teacher(self):
         self.client.login(username="teacher_username", password="teacher_password")
 
-        response = self.client.post('/teams/create/', {'name': 'test_project'}, follow=True)
+        response = self.client.post('/teams/create/', {'name': ''}, follow=True)
 
-        self.assertRedirects(response, '/teams/')
+        self.assertRedirects(response, '/index/')
 
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Only students are allowed to create a team.')
+        # messages = list(response.context['messages'])
+        # self.assertEqual(len(messages), 1)
+        # self.assertEqual(str(messages[0]), 'Only students are allowed to create a team.')
 
         self.assertFalse(Team.objects.filter(name='test_team').exists())
 
@@ -629,6 +638,228 @@ class ViewsTests(TestCase):
         self.assertEqual(str(messages[0]), 'You already have a team. Quit your team first.')
 
         self.assertFalse(Team.objects.filter(name='test_team2').exists())
+
+    # team join
+    def test_team_join(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        student2 = Student(username='student2_username', email="student2@mail.com", student_no=1234)
+        student2.set_password('student2_password')
+        student2.save()
+
+        self.client.login(username="student2_username", password="student2_password")
+
+        response = self.client.post('/teams/join/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        student.team.refresh_from_db()
+        student2.refresh_from_db()
+        self.assertEqual(student.team_id, student2.team_id)
+        self.assertEqual(student.team.second_teammate, student2)
+
+    def test_team_join_as_teacher(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        self.client.login(username="teacher_username", password="teacher_password")
+
+        response = self.client.post('/teams/join/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/index/')
+
+    def test_team_join_when_already_in_team(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        student2 = Student(username='student2_username', email="student2@mail.com", student_no=1234)
+        student2.set_password('student2_password')
+        student2.save()
+
+        user_create_team(student2, "test_team2")
+
+        self.client.login(username="student2_username", password="student2_password")
+
+        response = self.client.post('/teams/join/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'You already have a team. Quit your team first.')
+
+    def test_team_join_team_not_exist(self):
+        student = Student.objects.get(username="student_username")
+
+        self.client.login(username="student_username", password="student_password")
+
+        response = self.client.post('/teams/join/', {'team_id': 1}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Invalid team.')
+
+    # team details
+    def test_team_details_view_user_in_team(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        self.client.login(username="student_username", password="student_password")
+
+        response = self.client.get('/teams/details/', {'id': student.team_id}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'team/details.html')
+
+    def test_team_details_view_user_not_in_team(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        student2 = Student(username='student2_username', email="student2@mail.com", student_no=1234)
+        student2.set_password('student2_password')
+        student2.save()
+
+        self.client.login(username="student2_username", password="student2_password")
+
+        response = self.client.get('/teams/details/', {'id': student.team_id}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'team/details.html')
+
+    def test_team_details_team_not_exist(self):
+        student = Student.objects.get(username="student_username")
+
+        self.client.login(username="student_username", password="student_password")
+
+        response = self.client.get('/teams/details/', {'id': 123}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Invalid team.')
+
+    # team leave
+    def test_team_leave_only_one_student(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        self.client.login(username="student_username", password="student_password")
+
+        response = self.client.post('/teams/leave/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'You left the team.')
+
+        student.refresh_from_db()
+
+        self.assertEqual(student.team, None)
+        self.assertFalse(Team.objects.filter(name="test_team").exists())
+
+    def test_team_leave_first_student(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        student2 = Student(username='student2_username', email="student2@mail.com", student_no=1234)
+        student2.set_password('student2_password')
+        student2.save()
+
+        team = Team.objects.get(name="test_team")
+
+        user_join_team(student2, team)
+
+        self.client.login(username="student_username", password="student_password")
+
+        response = self.client.post('/teams/leave/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'You left the team.')
+
+        student.refresh_from_db()
+        student2.refresh_from_db()
+        team.refresh_from_db()
+
+        self.assertEqual(student.team, None)
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+
+        self.assertEqual(team.first_teammate,student2)
+        self.assertEqual(team.second_teammate, None)
+        self.assertEqual(student2.team, team)
+
+    def test_team_leave_second_student(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        team = Team.objects.get(name="test_team")
+
+        student2 = Student(username='student2_username', email="student2@mail.com", student_no=1234)
+        student2.set_password('student2_password')
+        student2.save()
+
+        user_join_team(student2, team)
+
+        self.client.login(username="student2_username", password="student2_password")
+
+        response = self.client.post('/teams/leave/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'You left the team.')
+
+        student.refresh_from_db()
+        student2.refresh_from_db()
+        team.refresh_from_db()
+
+        self.assertEqual(student2.team, None)
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+
+        self.assertEqual(team.first_teammate,student)
+        self.assertEqual(team.second_teammate, None)
+        self.assertEqual(student.team, team)
+
+    def test_team_leave_as_teacher(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        self.client.login(username="teacher_username", password="teacher_password")
+
+        response = self.client.post('/teams/join/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/index/')
+
+    def test_team_leave_user_not_in_team(self):
+        student = Student.objects.get(username="student_username")
+        user_create_team(student, "test_team")
+
+        student2 = Student(username='student2_username', email="student2@mail.com", student_no=1234)
+        student2.set_password('student2_password')
+        student2.save()
+
+        self.client.login(username="student2_username", password="student2_password")
+
+        response = self.client.post('/teams/leave/', {'team_id': student.team_id}, follow=True)
+
+        self.assertRedirects(response, '/teams/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'You must be in a team in order to quit it.')
+
+
+
+
+
 
     #TODO
     # more teams tests
@@ -663,10 +894,11 @@ class ViewsTests(TestCase):
                                     follow=True)
 
         self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, '/index/')
 
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Only teachers are allowed to create projects.')
+        # messages = list(response.context['messages'])
+        # self.assertEqual(len(messages), 1)
+        # self.assertEqual(str(messages[0]), 'Only teachers are allowed to create projects.')
 
         self.assertFalse(Project.objects.filter(name='test_project', description='test_project_description').exists())
 
@@ -728,11 +960,11 @@ class ViewsTests(TestCase):
         self.client.login(username="teacher_username", password="teacher_password")
         response = self.client.post('/projects/join/', {'project_id': project.id}, follow=True)
 
-        self.assertRedirects(response, '/projects/')
+        self.assertRedirects(response, '/index/')
 
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Only students are allowed to assign their team to a project.')
+        # messages = list(response.context['messages'])
+        # self.assertEqual(len(messages), 1)
+        # self.assertEqual(str(messages[0]), 'Only students are allowed to assign their team to a project.')
 
     def test_project_join_user_not_in_team(self):
         teacher = Teacher.objects.get(username="teacher_username")
@@ -813,11 +1045,11 @@ class ViewsTests(TestCase):
         self.client.login(username="teacher_username", password="teacher_password")
         response = self.client.post('/projects/leave/', {'project_id': project.id}, follow=True)
 
-        self.assertRedirects(response, '/projects/')
+        self.assertRedirects(response, '/index/')
 
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Only students are allowed to assign their team to a project.')
+        # messages = list(response.context['messages'])
+        # self.assertEqual(len(messages), 1)
+        # self.assertEqual(str(messages[0]), 'Only students are allowed to assign their team to a project.')
 
     def test_project_leave_user_not_in_team(self):
         teacher = Teacher.objects.get(username="teacher_username")
@@ -874,6 +1106,21 @@ class ViewsTests(TestCase):
 
         self.assertContains(response, "test_project_description")
 
+    def test_project_details_not_exisit(self):
+        student = Student.objects.get(username="student_username")
+
+        user_create_team(student, "test_team")
+
+        self.client.login(username="student_username", password="student_password")
+
+        response = self.client.get('/projects/details/',{'id': 123}, follow=True)
+
+        self.assertRedirects(response, '/projects/')
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Invalid project.')
+
     def test_project_delete(self):
         teacher = Teacher.objects.get(username="teacher_username")
 
@@ -915,12 +1162,13 @@ class ViewsTests(TestCase):
         self.client.login(username="student_username", password="student_password")
         response = self.client.post('/projects/delete/', {'project_id': project.id}, follow=True)
 
-        self.assertRedirects(response, '/projects/')
+        self.assertRedirects(response, '/index/')
 
-        messages = list(response.context['messages'])
-        self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Only teachers are allowed to delete projects.')
+        # messages = list(response.context['messages'])
+        # self.assertEqual(len(messages), 1)
+        # self.assertEqual(str(messages[0]), 'Only teachers are allowed to delete projects.')
 
+        self.assertTrue(Project.objects.filter(name="test_project").exists())
 
 
 class ModelsTests(TestCase):
@@ -986,3 +1234,5 @@ class FormsTests(TestCase):
                  'student_no': "wrong_number"}
         form = AccountCreateForm(data=data)
         self.assertFalse(form.is_valid())
+
+    #TODO forms for change email etc. tests
