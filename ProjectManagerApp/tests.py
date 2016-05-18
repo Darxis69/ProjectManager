@@ -3,8 +3,10 @@ from .models import User, Student, Teacher, Team, Project
 from .services import *
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
-from .forms import AccountCreateForm
+from .forms import AccountCreateForm, AccountChangePasswordForm, AccountChangeEmailForm
 
+
+# SERVICES TESTS
 
 class CreateUsersServicesTests(TestCase):
 
@@ -303,7 +305,6 @@ class ManageProjectsServicesTests(TestCase):
 
         self.assertFalse(Project.objects.filter(name=self.project_name).exists())
 
-    #TODO
     def test_join_project(self):
         user = Teacher()
         user.save()
@@ -328,7 +329,6 @@ class ManageProjectsServicesTests(TestCase):
         project.refresh_from_db()
         self.assertTrue(project.all_teams.filter(name=user2.team.name).exists())
 
-    #TODO
     def test_join_project_as_a_teacher(self):
         user = Teacher()
         user.save()
@@ -340,7 +340,6 @@ class ManageProjectsServicesTests(TestCase):
         with self.assertRaisesMessage(MustBeStudent, ""):
             user_team_join_project(user, project)
 
-    #TODO
     def test_leave_project_as_a_teacher(self):
         user = Teacher()
         user.save()
@@ -379,7 +378,7 @@ class ManageProjectsServicesTests(TestCase):
 
         self.assertEqual(project.assigned_team, student1.team)
         self.assertTrue(project.all_teams.count() == 0)
-        print (student1.status)
+
         self.assertEqual(project.assigned_team.first_teammate.status, Student.STUDENT_STATUS_ASSIGNED)
         self.assertEqual(project.assigned_team.second_teammate.status, Student.STUDENT_STATUS_ASSIGNED)
 
@@ -388,10 +387,10 @@ class ManageProjectsServicesTests(TestCase):
         # self.assertEqual(student2.status, Student.STUDENT_STATUS_ASSIGNED)
 
         #TODO
-        # ,pre assign test, more teams etc.
+        # assign teams to project
 
 
-
+# VIEWS TESTS
 
 class ViewsTests(TestCase):
 
@@ -560,8 +559,6 @@ class ViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Student with given student no already exists.')
 
-
-    # TODO
     def test_account_create_from_view_with_wrong_forms(self):
         response = self.client.get('/account/create/')
         self.assertEqual(response.status_code, 200)
@@ -621,6 +618,15 @@ class ViewsTests(TestCase):
 
         self.assertTrue(login)
 
+    # account detail view
+    def test_account_detail_view(self):
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/account/details/')
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTemplateUsed(response, "account/details.html")
+
+    # change mail
     def test_change_mail_from_view(self):
         self.client.login(username="student_username", password="student_password")
         response = self.client.get('/account/changeEmail/')
@@ -633,15 +639,85 @@ class ViewsTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'Email changed.')
 
-
         self.assertTrue(Student.objects.filter(username='student_username', email='test@123.pl').exists())
 
-        #TODO bad mail
-        #TODO change pass
+    def test_change_mail_from_view_with_invalid_mail(self):
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/account/changeEmail/')
+        self.assertEqual(response.status_code, 200)
 
+        response = self.client.post('/account/changeEmail/',{ 'new_email': 'wrong@mail'})
+        self.assertEqual(response.status_code, 200)
 
-    #team view
-    #TODO
+        self.assertContains(response, 'Enter a valid email address.')
+
+    def test_change_mail_from_view_email_alredy_in_use(self):
+        stud = Student(username='student_username2', email="test@123.pl", student_no=1234)
+        stud.set_password('student_password')
+        stud.save()
+
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/account/changeEmail/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/changeEmail/',{ 'new_email': 'test@123.pl'})
+        self.assertEqual(response.status_code, 200)
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'User with given email already exists.')
+
+        self.assertFalse(Student.objects.filter(username='student_username', email='test@123.pl').exists())
+
+    # change password
+    def test_change_password_from_view(self):
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/account/changePassword/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/changePassword/',{ 'current_password': 'student_password',
+                                                                 'new_password': "new_password",
+                                                                 'new_password_repeat': "new_password"})
+        self.assertEqual(response.status_code, 200)
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Password changed.')
+
+        student = Student.objects.get(username="student_username")
+        self.assertTrue(student.check_password("new_password"))
+
+    def test_change_password_from_view_invalid_current(self):
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/account/changePassword/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/changePassword/',{ 'current_password': 'wrong_password',
+                                                                 'new_password': "new_password",
+                                                                 'new_password_repeat': "new_password"})
+        self.assertEqual(response.status_code, 200)
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Invalid current password.')
+
+        student = Student.objects.get(username="student_username")
+        self.assertTrue(student.check_password("student_password")) # check if still old-one
+
+    def test_change_password_from_view_repeat_not_match(self):
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.get('/account/changePassword/')
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post('/account/changePassword/',{ 'current_password': 'student_password',
+                                                                 'new_password': "new_password",
+                                                                 'new_password_repeat': "new_password2"})
+        self.assertEqual(response.status_code, 200)
+
+        student = Student.objects.get(username="student_username")
+        self.assertTrue(student.check_password("student_password")) # check if still old-one
+
+    # team view
     def test_team_create_from_view(self):
         self.client.login(username="student_username", password="student_password")
         response = self.client.get('/teams/create/')
@@ -913,13 +989,7 @@ class ViewsTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'You must be in a team in order to quit it.')
 
-
-
-
-
-
     #TODO
-    # more teams tests
     # create team with the same name
 
     #project view
@@ -938,13 +1008,10 @@ class ViewsTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'Project created.')
 
-
         self.assertTrue(Project.objects.filter(name='test_project', description='test_project_description').exists())
 
     def test_project_create_from_view_as_student(self):
         self.client.login(username="student_username", password="student_password")
-        # response = self.client.get('/projects/create/')
-        # self.assertEqual(response.status_code, 200)
 
         response = self.client.post('/projects/create/', {'name': 'test_project',
                                                           'description': 'test_project_description'},
@@ -984,15 +1051,11 @@ class ViewsTests(TestCase):
         self.client.login(username="student_username", password="student_password")
         response = self.client.post('/projects/join/', {'project_id': project.id}, follow=True)
 
-        # self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, '/projects/')
 
-        #TODO:
-        # project.refresh_from_db()
-        # student.refresh_from_db()
+        project.refresh_from_db()
 
-        # self.assertTrue(project.all_teams.filter(name=student.team.name))
-        # self.assertEqual(student.team.project, project)
+        self.assertTrue(project.all_teams.filter(name=student.team.name).exists())
 
     def test_project_join_not_exist(self):
         student = Student.objects.get(username="student_username")
@@ -1074,11 +1137,11 @@ class ViewsTests(TestCase):
         self.client.login(username="student_username", password="student_password")
         response = self.client.post('/projects/join/', {'project_id': project.id}, follow=True)
 
-        #TODO
+        self.assertTrue(project.all_teams.filter(name=student.team.name).exists())
 
         response = self.client.post('/projects/leave/', {'project_id': project.id}, follow=True)
 
-        #TODO
+        self.assertFalse(project.all_teams.filter(name=student.team.name).exists())
 
     def test_project_leave_not_exist(self):
         student = Student.objects.get(username="student_username")
@@ -1158,9 +1221,6 @@ class ViewsTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
 
-        #TODO:
-        # check if details contains proper data
-
         self.assertContains(response, "test_project_description")
 
     def test_project_details_not_exisit(self):
@@ -1227,6 +1287,15 @@ class ViewsTests(TestCase):
 
         self.assertTrue(Project.objects.filter(name="test_project").exists())
 
+    # test wrong path
+    def test_error_view(self):
+        response = self.client.get('/wrong_path/')
+        self.assertEqual(response.status_code, 404)
+
+        self.assertTemplateUsed(response,'http_error.html' )
+
+
+# MODELS TESTS (db integrity)
 
 class ModelsTests(TestCase):
 
@@ -1250,6 +1319,8 @@ class ModelsTests(TestCase):
         with self.assertRaises(IntegrityError):
             user.save()
 
+
+# FORMS TESTS
 
 class FormsTests(TestCase):
 
@@ -1290,4 +1361,28 @@ class FormsTests(TestCase):
                  'account_type': "1",
                  'student_no': "wrong_number"}
         form = AccountCreateForm(data=data)
+        self.assertFalse(form.is_valid())
+
+    def test_account_change_password(self):
+        data = { 'current_password': "1234",
+                 'new_password': "new_pass",
+                 'new_password_repeat': "new_pass" }
+        form = AccountChangePasswordForm(data=data)
+        self.assertTrue(form.is_valid())
+
+    def test_account_change_password_not_matching(self):
+        data = { 'current_password': "1234",
+                 'new_password': "new_pass",
+                 'new_password_repeat': "wrong_pass" }
+        form = AccountChangePasswordForm(data=data)
+        self.assertFalse(form.is_valid())
+
+    def test_account_change_email(self):
+        data = { 'new_email': "test@mail.com"}
+        form = AccountChangeEmailForm(data=data)
+        self.assertTrue(form.is_valid())
+
+    def test_account_change_email_invaild(self):
+        data = { 'new_email': "test@mail"}
+        form = AccountChangeEmailForm(data=data)
         self.assertFalse(form.is_valid())
