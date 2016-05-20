@@ -75,7 +75,7 @@ def user_team_leave(user):
 
 
 def assign_team_to_project(project):
-    ready_teams = project.all_teams.exclude(first_teammate__isnull=True, second_teammate__isnull=True)
+    ready_teams = project.all_teams.exclude(first_teammate__isnull=True).exclude(second_teammate__isnull=True)
     count = ready_teams.count()
     if count:
         index = random.randint(0, count - 1)
