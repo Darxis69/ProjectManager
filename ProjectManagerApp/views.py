@@ -11,7 +11,8 @@ from django.views.generic import TemplateView
 
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
-    TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword
+    TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, TeamIsFull, \
+    UserAssignedToProject
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, \
     AccountChangeEmailForm, AccountChangePasswordForm
 from ProjectManagerApp.models import Project, Team, Student, Teacher
@@ -270,6 +271,8 @@ def team_join(request):
     #     return redirect(reverse('teams_list_url'))
     except UserAlreadyInTeam:
         messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+    except TeamIsFull:
+        messages.add_message(request, messages.ERROR, 'Team is already full.')
         return redirect(reverse('teams_list_url'))
 
     return redirect(reverse('teams_list_url'))
@@ -284,7 +287,7 @@ def team_assign(request):
         messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
         return redirect(reverse('index_url'))
 
-    messages.add_message(request, messages.INFO, 'Teams were assigned to projects.')
+    # messages.add_message(request, messages.INFO, 'Teams were assigned to projects.')
     return redirect(reverse('projects_list_url'))
 
 
@@ -312,6 +315,8 @@ def team_leave(request):
     #     return redirect(reverse('teams_list_url'))
     except UserNotInTeam:
         messages.add_message(request, messages.ERROR, 'You must be in a team in order to quit it.')
+    except UserAssignedToProject:
+        messages.add_message(request, messages.ERROR, 'You can\'t leave a team assigned to a project.')
         return redirect(reverse('teams_list_url'))
 
     messages.add_message(request, messages.INFO, 'You left the team.')

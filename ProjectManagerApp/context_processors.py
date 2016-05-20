@@ -46,5 +46,3 @@ def max_field_length(request):
     return {'max_field_length': 15}
 
 
-def student_unassigned_status(request):
-    return {'student_unassigned_status': Student.STUDENT_STATUS_UNASSIGNED}

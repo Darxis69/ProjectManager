@@ -18,7 +18,7 @@
                                     <th>Team name</th>
                                     <th>First student</th>
                                     <th>Second student</th>
-                                    {% if is_student and request.user.status == student_unassigned_status %}
+                                    {% if is_student and not user_team_assigned_project %}
                                     <th>Actions</th>
                                     {% endif %}
                                 </tr>
@@ -29,7 +29,7 @@
                                     <td><a href="{% url 'team_details_url' %}?id={{ team.id }}">{{ team.name|truncatechars:max_field_length }}</a></td>
                                     <td>{{ team.first_teammate }}</td>
                                     <td>{{ team.second_teammate }}</td>
-                                    {% if is_student and request.user.status == student_unassigned_status %}
+                                    {% if is_student and not user_team_assigned_project %}
                                     <td align="center">
                                         {% if request.user == team.first_teammate or request.user == team.second_teammate %}
                                             <form method="post" action="{% url 'team_leave_url' %}" name="team_leave_form">
@@ -40,12 +40,14 @@
                                                 </button>
                                             </form>
                                         {% elif not has_user_team %}
+                                            {% if not team.first_teammate or not team.second_teammate %}
                                             <form method="post" action="{% url 'team_join_url' %}">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-primary" name="team_id" value={{ team.id }}>
                                                     <span class="glyphicon glyphicon-log-in" aria-hidden="true"></span>
                                                 </button>
                                             </form>
+                                            {% endif %}
                                         {% endif %}
                                     </td>
                                     {% endif %}

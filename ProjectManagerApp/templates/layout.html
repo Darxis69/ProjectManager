@@ -45,10 +45,12 @@
                     <li class="dropdown">
                         <a href="{% url 'teams_list_url' %}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Teams<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            {% if is_student  %}
-                                <li><a href="{% url 'team_create_url' %}">Create</a></li>
-                                <li role="separator" class="divider"></li>
-                            {% elif is_teacher  %}
+                            {% if is_student %}
+                                {% if not has_user_team %}
+                                    <li><a href="{% url 'team_create_url' %}">Create</a></li>
+                                    <li role="separator" class="divider"></li>
+                                {% endif %}
+                            {% elif is_teacher %}
                                 <li><a href="{% url 'team_assign_url' %}" name="assign_teams_link">Assign</a></li>
                                 <li role="separator" class="divider"></li>
                             {% endif %}

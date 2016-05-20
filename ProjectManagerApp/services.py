@@ -1,6 +1,7 @@
 from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
-    TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword
+    TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
+    TeamIsFull, UserAssignedToProject
 from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
 import random
 
@@ -11,6 +12,9 @@ def user_join_team(user, team):
 
     if user.team:
         raise UserAlreadyInTeam
+
+    if team.first_teammate and team.second_teammate:
+        raise TeamIsFull
 
     if team.first_teammate is None:
         team.first_teammate = user
@@ -45,6 +49,9 @@ def user_team_leave(user):
     if not user.team:
         raise UserNotInTeam
 
+    if user.status == Student.STUDENT_STATUS_ASSIGNED:
+        raise UserAssignedToProject
+
     team = user.team
 
     if team.first_teammate == user:
@@ -68,14 +75,16 @@ def user_team_leave(user):
 
 
 def assign_team_to_project(project):
-    count = project.all_teams.count()
+    ready_teams = project.all_teams.exclude(first_teammate__isnull=True, second_teammate__isnull=True)
+    count = ready_teams.count()
     if count:
         index = random.randint(0, count - 1)
-        result = project.all_teams.all()[index]
+        result = ready_teams.all()[index]
         project.assigned_team = result
         if result.first_teammate and result.second_teammate:
             result.first_teammate.status = Student.STUDENT_STATUS_ASSIGNED
             result.second_teammate.status = Student.STUDENT_STATUS_ASSIGNED
+            project.status = Project.PROJECT_STATUS_CLOSED
             for team in project.all_teams.all():
                 project.all_teams.remove(team)
             project.save(force_update=True)

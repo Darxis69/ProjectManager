@@ -40,3 +40,11 @@ class TeamNotInProjectQueue(Exception):
 
 class InvalidPassword(Exception):
     pass
+
+
+class TeamIsFull(Exception):
+    pass
+
+
+class UserAssignedToProject(Exception):
+    pass
