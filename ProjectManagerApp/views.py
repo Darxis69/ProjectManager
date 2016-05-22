@@ -271,6 +271,7 @@ def team_join(request):
     #     return redirect(reverse('teams_list_url'))
     except UserAlreadyInTeam:
         messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
+        return redirect(reverse('teams_list_url'))
     except TeamIsFull:
         messages.add_message(request, messages.ERROR, 'The selected team is already full.')
         return redirect(reverse('teams_list_url'))
@@ -281,13 +282,13 @@ def team_join(request):
 @login_required
 @user_passes_test(lambda u: isinstance(u, Teacher))
 def team_assign(request):
-    try:
-        assign_teams_to_projects(request.user)
-    except MustBeTeacher:
-        messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
-        return redirect(reverse('index_url'))
+    # try:
+    assign_teams_to_projects(request.user)
+    # except MustBeTeacher:
+    #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
+    #     return redirect(reverse('index_url'))
 
-    # messages.add_message(request, messages.INFO, 'Teams were assigned to projects.')
+    messages.add_message(request, messages.INFO, 'All possible teams are assigned.')
     return redirect(reverse('projects_list_url'))
 
 
