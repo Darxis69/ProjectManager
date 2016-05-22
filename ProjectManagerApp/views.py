@@ -315,6 +315,7 @@ def team_leave(request):
     #     return redirect(reverse('teams_list_url'))
     except UserNotInTeam:
         messages.add_message(request, messages.ERROR, 'You must be in a team in order to quit it.')
+        return redirect(reverse('teams_list_url'))
     except UserAssignedToProject:
         messages.add_message(request, messages.ERROR, 'You can\'t leave a team assigned to a project.')
         return redirect(reverse('teams_list_url'))
