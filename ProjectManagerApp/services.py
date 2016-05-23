@@ -91,6 +91,7 @@ def assign_team_to_project(project):
                 project.all_teams.remove(team)
             project.save(force_update=True)
             return 1
+    return 0
 
 
 def assign_teams_to_projects(user):
