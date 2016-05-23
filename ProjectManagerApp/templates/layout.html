@@ -69,14 +69,25 @@
                             <li><a href="{% url 'account_details_url' %}">Account details</a></li>
                             <li><a href="{% url 'account_change_email_url' %}">Change email</a></li>
                             <li><a href="{% url 'account_change_password_url' %}">Change password</a></li>
+                            <li><a href="{% url 'account_delete_url' %}" id="delete_account_link">Delete account</a></li>
                         </ul>
                     </li>
                     <li><a href="{% url 'account_logout_url' %}">Logout</a></li>
                 {% endif %}
             </ul>
         </div>
+        <form method="post" action="{% url 'account_delete_url' %}" id="delete_account_form">
+            {% csrf_token %}
+        </form>
         <script>
-            makeConfirmableLinksWithMessage($("a[name='assign_teams_link']"), "Are you sure you want to assign teams now?");
+            $('#delete_account_link').on("click", function(e) {
+                e.preventDefault();
+                bootbox.confirm("Are you sure you want to delete your account?", function(result) {
+                    if (result) {
+                        $('#delete_account_form').submit();
+                    }
+                });
+            });
         </script>
     </div>
 </nav>

@@ -225,11 +225,7 @@ def user_change_email(user, new_email):
 
 
 def user_delete_account(user):
-    try:
-        if UserBase.objects.get(email__iexact=new_email):
-            raise UserWithGivenEmailAlreadyExists
-    except UserBase.DoesNotExist:
-        pass
+    if user.team:
+        raise UserAlreadyInTeam
 
-    user.email = new_email
-    user.save(force_update=True)
+    user.delete()

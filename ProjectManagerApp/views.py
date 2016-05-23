@@ -18,7 +18,7 @@ from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateF
 from ProjectManagerApp.models import Project, Team, Student, Teacher
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
     user_create_project, user_team_join_project, account_create_teacher, account_create_student, \
-    user_team_leave_project, user_change_email, user_change_password, assign_teams_to_projects
+    user_team_leave_project, user_change_email, user_change_password, assign_teams_to_projects, user_delete_account
 
 
 class AccountCreateFormView(FormView):
@@ -122,6 +122,20 @@ class IndexView(TemplateView):
 
 def logout(request):
     auth_logout(request)
+    return redirect(reverse('account_login_url'))
+
+
+@require_POST
+@login_required
+def delete_account(request):
+    try:
+        user_delete_account(request.user)
+        # auth_logout(request)
+        messages.add_message(request, messages.SUCCESS, 'Your account was deleted.')
+    except UserAlreadyInTeam:
+        messages.add_message(request, messages.ERROR, 'You can\'t delete your account now. Leave your team first.')
+        return redirect(reverse('index_url'))
+
     return redirect(reverse('account_login_url'))
 
 

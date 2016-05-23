@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^account/logout/$', views.logout, name='account_logout_url'),
     url(r'^account/create/$', AccountCreateFormView.as_view(), name="account_create_url"),
     url(r'^account/details/$', views.AccountDetailsView.as_view(), name="account_details_url"),
+    url(r'^account/delete/$', views.delete_account, name='account_delete_url'),
     url(r'^account/changeEmail/$', views.AccountChangeEmailFormView.as_view(), name="account_change_email_url"),
     url(r'^account/changePassword/$', views.AccountChangePasswordFormView.as_view(), name="account_change_password_url"),
     url(r'^projects/$', ProjectListView.as_view(), name="projects_list_url"),
