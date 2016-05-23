@@ -90,15 +90,20 @@ def assign_team_to_project(project):
             for team in project.all_teams.all():
                 project.all_teams.remove(team)
             project.save(force_update=True)
+            return 1
 
 
 def assign_teams_to_projects(user):
     if not isinstance(user, Teacher):
         raise MustBeTeacher
 
+    projects_assigned = 0
     for project in Project.objects.all():
         if not project.assigned_team:
-            assign_team_to_project(project)
+            result = assign_team_to_project(project)
+            projects_assigned += result
+
+    return projects_assigned
 
 
 def user_team_join_project(user, project):

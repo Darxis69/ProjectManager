@@ -298,12 +298,12 @@ def team_join(request):
 @user_passes_test(lambda u: isinstance(u, Teacher))
 def team_assign(request):
     # try:
-    assign_teams_to_projects(request.user)
+    projects_assigned = assign_teams_to_projects(request.user)
     # except MustBeTeacher:
     #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
     #     return redirect(reverse('index_url'))
 
-    messages.add_message(request, messages.INFO, 'All possible teams were assigned.')
+    messages.add_message(request, messages.INFO, 'Assigning completed. Assigned teams to ' + repr(projects_assigned) + ' projects.')
     return redirect(reverse('projects_list_url'))
 
 

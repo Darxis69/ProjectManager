@@ -1516,6 +1516,10 @@ class ViewsTests(TestCase):
         self.client.login(username="teacher_username", password="teacher_password")
         response = self.client.post('/teams/assign/', follow=True)
 
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Assigning completed. Assigned teams to 1git  projects.')
+
         team.refresh_from_db()
         project.refresh_from_db()
         student.refresh_from_db()
