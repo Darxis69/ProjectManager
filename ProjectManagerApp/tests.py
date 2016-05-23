@@ -1518,7 +1518,7 @@ class ViewsTests(TestCase):
 
         messages = list(response.context['messages'])
         self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Assigning completed. Assigned teams to 1git  projects.')
+        self.assertEqual(str(messages[0]), 'Assigning completed. Assigned teams to 1 projects.')
 
         team.refresh_from_db()
         project.refresh_from_db()
