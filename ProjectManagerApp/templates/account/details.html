@@ -11,6 +11,7 @@
                 <p>Account type: {% if is_student %}Student{% else %}Staff{% endif %}</p>
                 {% if is_student %}
                     <p>Student No: {{ request.user.student_no }}</p>
+                    <p>Status: {{ request.user.get_status_display }}</p>
                 {% endif %}
             </div>
         </div>
