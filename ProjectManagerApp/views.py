@@ -279,6 +279,7 @@ def team_join(request):
     return redirect(reverse('teams_list_url'))
 
 
+@require_POST
 @login_required
 @user_passes_test(lambda u: isinstance(u, Teacher))
 def team_assign(request):
@@ -288,7 +289,7 @@ def team_assign(request):
     #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
     #     return redirect(reverse('index_url'))
 
-    messages.add_message(request, messages.INFO, 'All possible teams are assigned.')
+    messages.add_message(request, messages.INFO, 'All possible teams were assigned.')
     return redirect(reverse('projects_list_url'))
 
 
@@ -306,6 +307,7 @@ class TeamDetailsView(TemplateView):
         return render(request, self.template_name, {'team': team})
 
 
+@require_POST
 @login_required
 @user_passes_test(lambda u: isinstance(u, Student))
 def team_leave(request):

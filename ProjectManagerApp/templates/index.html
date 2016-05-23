@@ -61,7 +61,7 @@
                 <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name|truncatechars:max_field_length }}</a></p>
             </div>
             <div class="list-group">
-                <a href="{% url 'team_leave_url' %}" class="list-group-item" name="team_leave_link">
+                <a href="#" class="list-group-item" id="team_leave_link">
                     <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Leave your team</a>
                 <a href="{% url 'teams_list_url' %}" class="list-group-item">
                     <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all teams</a>
@@ -78,8 +78,18 @@
             </div>
             {% endif %}
         </div>
+        <form method="post" action="{% url 'team_leave_url' %}" id="team_leave_form">
+            {% csrf_token %}
+        </form>
         <script>
-            makeConfirmableLinksWithMessage($("a[name='team_leave_link']"), "Are you sure you want to leave your team?");
+            $('#team_leave_link').on("click", function(e) {
+                e.preventDefault();
+                bootbox.confirm("Are you sure you want to leave your team?", function(result) {
+                    if (result) {
+                        $('#team_leave_form').submit();
+                    }
+                });
+            });
         </script>
     </div>
 </div>
@@ -108,12 +118,22 @@
                 <div class="list-group">
                     <a href="{% url 'project_create_url' %}" class="list-group-item">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Create a new project</a>
-                    <a href="{% url 'team_assign_url' %}" class="list-group-item" name="assign_teams_link">
+                    <a href="#" class="list-group-item" id="assign_teams_link">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Assign teams to projects</a>
                 </div>
             </div>
+        <form method="post" action="{% url 'team_assign_url' %}" id="assign_teams_form">
+            {% csrf_token %}
+        </form>
         <script>
-            makeConfirmableLinksWithMessage($("a[name='assign_teams_link']"), "Are you sure you want to assign teams now?");
+            $('#assign_teams_link').on("click", function(e) {
+                e.preventDefault();
+                bootbox.confirm("Are you sure you want to assign teams to projects?", function(result) {
+                    if (result) {
+                        $('#assign_teams_form').submit();
+                    }
+                });
+            });
         </script>
     </div>
 </div>
