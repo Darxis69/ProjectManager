@@ -222,3 +222,14 @@ def user_change_email(user, new_email):
 
     user.email = new_email
     user.save(force_update=True)
+
+
+def user_delete_account(user):
+    try:
+        if UserBase.objects.get(email__iexact=new_email):
+            raise UserWithGivenEmailAlreadyExists
+    except UserBase.DoesNotExist:
+        pass
+
+    user.email = new_email
+    user.save(force_update=True)
