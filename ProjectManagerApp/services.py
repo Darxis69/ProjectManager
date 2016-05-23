@@ -84,6 +84,8 @@ def assign_team_to_project(project):
         if result.first_teammate and result.second_teammate:
             result.first_teammate.status = Student.STUDENT_STATUS_ASSIGNED
             result.second_teammate.status = Student.STUDENT_STATUS_ASSIGNED
+            result.first_teammate.save(force_update=True)
+            result.second_teammate.save(force_update=True)
             project.status = Project.PROJECT_STATUS_CLOSED
             for team in project.all_teams.all():
                 project.all_teams.remove(team)

@@ -122,9 +122,15 @@ class ManageUsersServicesTests(TestCase):
 
 class ManageTeamsServicesTests(TestCase):
 
-    def test_create_team(self):
+    def setUp(self):
         user = Student(username='test_username', email='test@mail.com', student_no="1234")
         user.save()
+
+        user2 = Student(username='test_username2', email='test2@mail.com', student_no="1212")
+        user2.save()
+
+    def test_create_team(self):
+        user = Student.objects.get(username='test_username')
 
         user_create_team(user, "test_team")
 
@@ -134,8 +140,7 @@ class ManageTeamsServicesTests(TestCase):
         self.assertEqual(user.team, team)
 
     def test_leave_one_person_team(self):
-        user = Student(username='test_username', email='test@mail.com', student_no="1234")
-        user.save()
+        user = Student.objects.get(username='test_username')
 
         user_create_team(user, "test_team")
         self.assertTrue(Team.objects.filter(name="test_team").exists())
@@ -147,11 +152,8 @@ class ManageTeamsServicesTests(TestCase):
         self.assertEqual(user.team, None)
 
     def test_leave_first_from_two_persons_team(self):
-        user = Student(username='test_username', email='test@mail.com', student_no="1234")
-        user.save()
-
-        user2 = Student(username='test_username2', email='test2@mail.com', student_no="1212")
-        user2.save()
+        user = Student.objects.get(username='test_username')
+        user2 = Student.objects.get(username='test_username2')
 
         user_create_team(user, "test_team")
         self.assertTrue(Team.objects.filter(name="test_team").exists())
@@ -181,11 +183,8 @@ class ManageTeamsServicesTests(TestCase):
         self.assertEqual(team.second_teammate, None)
 
     def test_leave_second_from_two_persons_team(self):
-        user = Student(username='test_username', email='test@mail.com', student_no="1234")
-        user.save()
-
-        user2 = Student(username='test_username2', email='test2@mail.com', student_no="1212")
-        user2.save()
+        user = Student.objects.get(username='test_username')
+        user2 = Student.objects.get(username='test_username2')
 
         user_create_team(user, "test_team")
         self.assertTrue(Team.objects.filter(name="test_team").exists())
@@ -237,11 +236,8 @@ class ManageTeamsServicesTests(TestCase):
             user_team_leave(user)
 
     def test_leave_team_with_project_assigned(self):
-        user = Student(username='test_username', email='test@mail.com', student_no="1234")
-        user.save()
-
-        user2 = Student(username='test_username2', email='test2@mail.com', student_no="1212")
-        user2.save()
+        user = Student.objects.get(username='test_username')
+        user2 = Student.objects.get(username='test_username2')
 
         user_create_team(user, "test_team")
         self.assertTrue(Team.objects.filter(name="test_team").exists())
@@ -1496,7 +1492,6 @@ class ViewsTests(TestCase):
 
         self.assertTrue(Project.objects.filter(name="test_project").exists())
 
-    # TODO:test team assign
     def test_team_assign(self):
         teacher = Teacher.objects.get(username="teacher_username")
         student = Student.objects.get(username="student_username")
@@ -1508,19 +1503,35 @@ class ViewsTests(TestCase):
         user_create_project(teacher, "test_project", "test_project_description")
         user_create_team(student, "test_team")
 
-        # team = Team.objects.get(name="test_team")
-        # user_join_team(student2, team)
-        #
-        # project = Project.objects.get(name="test_project")
-        #
-        # user_team_join_project(student2, project)
-        #
-        # self.client.login(username="teacher_username", password="teacher_password")
-        # response = self.client.get('/teams/assign/', follow=True)
-        # self.assertRedirects(response, '/projects/')
-        #
-        # project.refresh_from_db()
-        # self.assertTrue(project.all_teams.filter(name=student.team.name).exists())
+        team = Team.objects.get(name="test_team")
+        user_join_team(student2, team)
+
+        project = Project.objects.get(name="test_project")
+
+        user_team_join_project(student2, project)
+        project.refresh_from_db()
+
+        self.assertTrue(project.all_teams.filter(name="test_team").exists())
+
+        self.client.login(username="teacher_username", password="teacher_password")
+        response = self.client.post('/teams/assign/', follow=True)
+
+        team.refresh_from_db()
+        project.refresh_from_db()
+        student.refresh_from_db()
+        student2.refresh_from_db()
+
+        self.assertRedirects(response, '/projects/')
+        self.assertFalse(project.all_teams.filter(name="test_team").exists())
+        self.assertEqual(project.assigned_team, team)
+        self.assertEqual(team.project, project)
+        self.assertTrue(project.all_teams.count() == 0)
+        self.assertEqual(project.status, Project.PROJECT_STATUS_CLOSED)
+        self.assertEqual(student.status, Student.STUDENT_STATUS_ASSIGNED)
+        self.assertEqual(student2.status, Student.STUDENT_STATUS_ASSIGNED)
+
+
+
 
 
     # test wrong path
