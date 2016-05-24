@@ -398,11 +398,8 @@ class ProjectEditFormView(FormView):
     form_class = ProjectEditForm
 
     def get_context_data(self, project_id, **kwargs):
-        if self.request.method == "POST":
-            project_edit_form = ProjectEditForm(self.request.POST)
-        else:
-            project = Project.objects.get(pk=project_id)
-            project_edit_form = ProjectEditForm(initial={'name': project.name, 'description': project.description})
+        project = Project.objects.get(pk=project_id)
+        project_edit_form = ProjectEditForm(initial={'name': project.name, 'description': project.description})
 
         return self.create_context_data(project_edit_form, project_id)
 
