@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
-    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists
+    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists, OnlyAuthorCanEditProjectException
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, \
     AccountChangeEmailForm, AccountChangePasswordForm, ProjectEditForm
 from ProjectManagerApp.models import Project, Team, Student, Teacher
@@ -428,6 +428,9 @@ class ProjectEditFormView(FormView):
                                   project_edit_form.cleaned_data.get('description'))
             except ProjectWithGivenNameAlreadyExists:
                 messages.add_message(request, messages.ERROR, 'Project with given name already exists.')
+                return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
+            except OnlyAuthorCanEditProjectException:
+                messages.add_message(request, messages.ERROR, 'Only author can edit project.')
                 return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
             except Project.DoesNotExist:
                 messages.add_message(request, messages.ERROR, 'Invalid project.')
