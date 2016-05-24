@@ -18,6 +18,10 @@ class ProjectHasAssignedTeam(Exception):
     pass
 
 
+class ProjectWithGivenNameAlreadyExists(Exception):
+    pass
+
+
 class UserWithGivenUsernameAlreadyExists(Exception):
     pass
 

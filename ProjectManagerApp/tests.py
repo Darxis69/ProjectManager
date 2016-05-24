@@ -1,4 +1,6 @@
 from django.test import TestCase
+
+from ProjectManagerApp.exceptions import ProjectWithGivenNameAlreadyExists
 from .models import User, Student, Teacher, Team, Project
 from .services import *
 from django.core.urlresolvers import reverse
@@ -343,6 +345,19 @@ class ManageProjectsServicesTests(TestCase):
         self.assertEqual(project.assigned_team, None)
         self.assertEqual(project.author, user)
         self.assertTrue(Project.objects.filter(name=self.project_name).exists())
+
+    def test_create_project_unique_name(self):
+        user = Teacher()
+        user.save()
+
+        user_create_project(user, "project 1", "description")
+        user_create_project(user, "project 2", "description")
+
+        with self.assertRaisesMessage(ProjectWithGivenNameAlreadyExists, ""):
+            user_create_project(user, "project 1", "description")
+
+        with self.assertRaisesMessage(ProjectWithGivenNameAlreadyExists, ""):
+            user_create_project(user, "PROJECT 2", "description")
 
     def test_delete_project(self):
         user = Teacher()

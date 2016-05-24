@@ -41,7 +41,7 @@ class Project(models.Model):
          (PROJECT_STATUS_CLOSED, PROJECT_STATUS_CLOSED_LABEL)
      )
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     description = models.CharField(max_length=4096)
     status = models.CharField(max_length=1, choices=PROJECT_STATUS)
     assigned_team = models.OneToOneField(Team, null=True, related_name="project", on_delete=models.SET_NULL)
