@@ -1439,7 +1439,7 @@ class ViewsTests(TestCase):
 
         self.client.login(username="student_username", password="student_password")
 
-        response = self.client.get('/projects/details/',{'id': project.id})
+        response = self.client.get(reverse('project_details_url', kwargs={'id': project.id}))
 
         self.assertEqual(response.status_code, 200)
 
@@ -1452,7 +1452,7 @@ class ViewsTests(TestCase):
 
         self.client.login(username="student_username", password="student_password")
 
-        response = self.client.get('/projects/details/',{'id': 123}, follow=True)
+        response = self.client.get(reverse('project_details_url', kwargs={'id': 123}), follow=True)
 
         self.assertRedirects(response, '/projects/')
 

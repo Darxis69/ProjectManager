@@ -1,7 +1,7 @@
 from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
-    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists
+    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists, OnlyAuthorCanEditProjectException
 from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
 import random
 
@@ -175,6 +175,23 @@ def user_create_project(user, project_name, project_description):
     project.author = user
 
     project.save()
+
+    return project
+
+
+def user_edit_project(user, project_id, project_name, project_description):
+    project = Project.objects.get(pk=project_id)
+
+    if project.author != user:
+        raise OnlyAuthorCanEditProjectException
+
+    if Project.objects.exclude(pk=project_id).filter(name__iexact=project_name).exists():
+        raise ProjectWithGivenNameAlreadyExists
+
+    project.name = project_name
+    project.description = project_description
+
+    project.save(force_update=True)
 
     return project
 

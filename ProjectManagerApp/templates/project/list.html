@@ -24,7 +24,7 @@
                             <tbody>
                             {% for project in projects %}
                                 <tr>
-                                    <td><a href="{% url 'project_details_url' %}?id={{ project.id }}">{{ project.name|truncatechars:max_field_length }}</a></td>
+                                    <td><a href="{% url 'project_details_url' id=project.id %}">{{ project.name|truncatechars:max_field_length }}</a></td>
                                     <td>
                                         {% if project.assigned_team %}
                                             <a href="{% url 'team_details_url' %}?id={{ project.assigned_team.id }}">{{ project.assigned_team.name|truncatechars:max_field_length }}</a>

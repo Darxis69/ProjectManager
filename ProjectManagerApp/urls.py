@@ -1,4 +1,4 @@
-from django.conf.urls import url, handler404
+from django.conf.urls import url
 
 from ProjectManagerApp.views import LoginFormView, AccountCreateFormView, ProjectCreateFormView, IndexView, \
     TeamCreateFormView, TeamListView, ProjectListView
@@ -19,7 +19,8 @@ urlpatterns = [
     url(r'^projects/join/$', views.project_join, name="project_join_url"),
     url(r'^projects/leave/$', views.project_leave, name="project_leave_url"),
     url(r'^projects/delete/$', views.project_delete, name="project_delete_url"),
-    url(r'^projects/details/$', views.ProjectDetailsView.as_view(), name="project_details_url"),
+    url(r'^projects/details/(?P<id>[0-9]+)/$', views.ProjectDetailsView.as_view(), name="project_details_url"),
+    url(r'^projects/edit/$', views.ProjectEditFormView.as_view(), name="project_edit_url"),
     url(r'^teams/$', TeamListView.as_view(), name="teams_list_url"),
     url(r'^teams/create/$', TeamCreateFormView.as_view(), name="team_create_url"),
     url(r'^teams/assign/$', views.team_assign, name="team_assign_url"),

@@ -68,5 +68,9 @@ class ProjectCreateForm(forms.Form):
     description = forms.CharField(label="Description", widget=forms.Textarea, max_length=4096)
 
 
+class ProjectEditForm(ProjectCreateForm):
+    pass
+
+
 class TeamCreateForm(forms.Form):
     name = forms.CharField(label='Team name', max_length=50)

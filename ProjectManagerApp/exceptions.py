@@ -22,6 +22,10 @@ class ProjectWithGivenNameAlreadyExists(Exception):
     pass
 
 
+class OnlyAuthorCanEditProjectException(Exception):
+    pass
+
+
 class UserWithGivenUsernameAlreadyExists(Exception):
     pass
 

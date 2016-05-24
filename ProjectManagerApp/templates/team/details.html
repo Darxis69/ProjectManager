@@ -11,7 +11,7 @@
                 <p>Name: {{ team.name }}</p>
                 <p>First student: {{ team.first_teammate }}</p>
                 <p>Second student: {{ team.second_teammate }}</p>
-                <p>Assigned project: {% if team.project %}<a href="{% url "project_details_url" %}?id={{ team.project.id }}">{{ team.project.name }}</a>{% else %}None{% endif %}</p>
+                <p>Assigned project: {% if team.project %}<a href="{% url "project_details_url" id=team.project.id %}">{{ team.project.name }}</a>{% else %}None{% endif %}</p>
 
             </div>
         </div>

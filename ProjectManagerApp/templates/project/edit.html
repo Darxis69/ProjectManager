@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% load bootstrap3 %}
+{% block content %}
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-info">
+            <div class="panel-heading">
+                <div class="panel-title">Edit project</div>
+                <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'project_details_url' id=project_id %}">Return to project details</a></div>
+            </div>
+            <div class="panel-body">
+                <form action="{% url 'project_edit_url' %}?id={{ project_id }}" method="POST" class="form">
+                    {% csrf_token %}
+                    {% bootstrap_form project_edit_form %}
+                    {% buttons %}
+                        <a href="{% url 'project_details_url' id=project_id %}">{% bootstrap_button "Cancel" button_type="button" button_class="btn btn-default" %}</a>
+                        {% bootstrap_button "Save" button_type="submit" button_class="btn btn-primary pull-right" %}
+                    {% endbuttons %}
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

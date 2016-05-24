@@ -14,11 +14,11 @@ from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserN
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
     TeamIsFull, UserAssignedToProject
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, \
-    AccountChangeEmailForm, AccountChangePasswordForm
+    AccountChangeEmailForm, AccountChangePasswordForm, ProjectEditForm
 from ProjectManagerApp.models import Project, Team, Student, Teacher
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
     user_create_project, user_team_join_project, account_create_teacher, account_create_student, \
-    user_team_leave_project, user_change_email, user_change_password, assign_teams_to_projects, user_delete_account
+    user_team_leave_project, user_change_email, user_change_password, assign_teams_to_projects, user_delete_account, user_edit_project
 
 
 class AccountCreateFormView(FormView):
@@ -389,6 +389,55 @@ class ProjectCreateFormView(FormView):
         return render(request, self.template_name, self.create_context_data(project_create_form))
 
 
+@method_decorator(login_required, name='dispatch')
+@method_decorator(user_passes_test(lambda u: isinstance(u, Teacher)), name='dispatch')
+class ProjectEditFormView(FormView):
+    template_name = 'project/edit.html'
+    form_class = ProjectEditForm
+
+    def get_context_data(self, project_id, **kwargs):
+        if self.request.method == "POST":
+            project_edit_form = ProjectEditForm(self.request.POST)
+        else:
+            project = Project.objects.get(pk=project_id)
+            project_edit_form = ProjectEditForm(initial={'name': project.name, 'description': project.description})
+
+        return self.create_context_data(project_edit_form, project_id)
+
+    def create_context_data(self, project_edit_form, project_id, **kwargs):
+        context = super(ProjectEditFormView, self).get_context_data(**kwargs)
+        context['project_edit_form'] = project_edit_form
+        context['project_id'] = project_id
+        return context
+
+    def get(self, request, *args, **kwargs):
+        try:
+            project_id = request.GET.get('id')
+            context = self.get_context_data(project_id)
+        except (KeyError, Project.DoesNotExist):
+            messages.add_message(request, messages.ERROR, 'Invalid project.')
+            return redirect(reverse('projects_details_url'))
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            project_id = request.GET.get('id')
+        except KeyError:
+            messages.add_message(request, messages.ERROR, 'Invalid project.')
+            return redirect(reverse('projects_list_url'))
+
+        project_edit_form = ProjectEditForm(request.POST)
+        if project_edit_form.is_valid():
+            user_edit_project(request.user, project_id, project_edit_form.cleaned_data.get('name'),
+                              project_edit_form.cleaned_data.get('description'))
+
+            messages.add_message(request, messages.SUCCESS, 'Project edit success.')
+            return redirect('project_details_url', id=project_id)
+
+        return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
+
+
 @require_POST
 @login_required
 @user_passes_test(lambda u: isinstance(u, Student))
@@ -451,7 +500,7 @@ class ProjectDetailsView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         try:
-            project = Project.objects.get(pk=request.GET.get('id'))
+            project = Project.objects.get(pk=self.kwargs['id'])
         except (KeyError, Project.DoesNotExist):
             messages.add_message(request, messages.ERROR, 'Invalid project.')
             return redirect(reverse('projects_list_url'))
