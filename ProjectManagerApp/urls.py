@@ -26,6 +26,6 @@ urlpatterns = [
     url(r'^teams/assign/$', views.team_assign, name="team_assign_url"),
     url(r'^teams/join/$', views.team_join, name="team_join_url"),
     url(r'^teams/leave/$', views.team_leave, name="team_leave_url"),
-    url(r'^teams/details/$', views.TeamDetailsView.as_view(), name="team_details_url"),
+    url(r'^teams/details/(?P<id>[0-9]+)/$', views.TeamDetailsView.as_view(), name="team_details_url"),
     url(r'^.*/$', views.handler404, name='error_404_url'),
 ]

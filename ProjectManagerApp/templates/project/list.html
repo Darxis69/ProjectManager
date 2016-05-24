@@ -27,7 +27,7 @@
                                     <td><a href="{% url 'project_details_url' id=project.id %}">{{ project.name|truncatechars:max_field_length }}</a></td>
                                     <td>
                                         {% if project.assigned_team %}
-                                            <a href="{% url 'team_details_url' %}?id={{ project.assigned_team.id }}">{{ project.assigned_team.name|truncatechars:max_field_length }}</a>
+                                            <a href="{% url 'team_details_url' id=project.assigned_team.id %}">{{ project.assigned_team.name|truncatechars:max_field_length }}</a>
                                         {% else %}
                                             None
                                         {% endif %}
@@ -35,7 +35,7 @@
                                     <td>
                                         {% if project.all_teams.count %}
                                             {% for team in project.all_teams.all %}
-                                                <a href="{% url 'team_details_url' %}?id={{ team.id }}">{{ team.name|truncatechars:max_field_length }}</a><br/>
+                                                <a href="{% url 'team_details_url' id=team.id %}">{{ team.name|truncatechars:max_field_length }}</a><br/>
                                             {% endfor %}
                                         {% else %}
                                             None

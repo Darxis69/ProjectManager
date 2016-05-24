@@ -10,7 +10,7 @@
             <div class="panel-body">
                 <p>Name: {{ project.name }}</p>
                 <p>Author: {{ project.author }}</p>
-                <p>Assigned team: {% if project.assigned_team %}<a href="{% url "team_details_url" %}?id={{ project.assigned_team.id }}">{{ project.assigned_team.name }}</a>{% else %}None{% endif %}</p>
+                <p>Assigned team: {% if project.assigned_team %}<a href="{% url "team_details_url" id=project.assigned_team.id %}">{{ project.assigned_team.name }}</a>{% else %}None{% endif %}</p>
                 <p>Status: {{ project.get_status_display }}</p>
                 <p>Description:</p>
                 <div class="well well-sm" style="background-color: white; font-size: 90%;">

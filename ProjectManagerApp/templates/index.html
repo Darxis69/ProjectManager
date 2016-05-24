@@ -58,17 +58,17 @@
             <div class="panel-heading"><b>Team</b></div>
             {% if user_team_assigned_project %}
             <div class="panel-body">
-                <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name|truncatechars:max_field_length }}</a></p>
+                <p>You are assigned to: <a href="{% url 'team_details_url' id=request.user.team.id %}">{{ request.user.team.name|truncatechars:max_field_length }}</a></p>
             </div>
             <div class="list-group">
-                <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}" class="list-group-item">
+                <a href="{% url 'team_details_url' id=request.user.team.id %}" class="list-group-item">
                     <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View your team</a>
                 <a href="{% url 'teams_list_url' %}" class="list-group-item">
                     <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View all teams</a>
             </div>
             {% elif has_user_team %}
             <div class="panel-body">
-                <p>You are assigned to: <a href="{% url 'team_details_url' %}?id={{ request.user.team.id }}">{{ request.user.team.name|truncatechars:max_field_length }}</a></p>
+                <p>You are assigned to: <a href="{% url 'team_details_url' id=request.user.team.id %}">{{ request.user.team.name|truncatechars:max_field_length }}</a></p>
             </div>
             <div class="list-group">
                 <a href="#" class="list-group-item" id="team_leave_link">

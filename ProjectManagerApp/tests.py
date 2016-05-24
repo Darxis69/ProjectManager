@@ -1067,7 +1067,7 @@ class ViewsTests(TestCase):
 
         self.client.login(username="student_username", password="student_password")
 
-        response = self.client.get('/teams/details/', {'id': student.team_id}, follow=True)
+        response = self.client.get(reverse('team_details_url', kwargs={'id': student.team_id}), follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'team/details.html')
@@ -1082,7 +1082,7 @@ class ViewsTests(TestCase):
 
         self.client.login(username="student2_username", password="student2_password")
 
-        response = self.client.get('/teams/details/', {'id': student.team_id}, follow=True)
+        response = self.client.get(reverse('team_details_url', kwargs={'id': student.team_id}), follow=True)
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'team/details.html')
@@ -1092,7 +1092,7 @@ class ViewsTests(TestCase):
 
         self.client.login(username="student_username", password="student_password")
 
-        response = self.client.get('/teams/details/', {'id': 123}, follow=True)
+        response = self.client.get(reverse('team_details_url', kwargs={'id': 123}), follow=True)
 
         self.assertRedirects(response, '/teams/')
 

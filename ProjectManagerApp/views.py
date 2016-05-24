@@ -316,7 +316,7 @@ class TeamDetailsView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         try:
-            team = Team.objects.get(pk=request.GET.get('id'))
+            team = Team.objects.get(pk=self.kwargs['id'])
         except (KeyError, Team.DoesNotExist):
             messages.add_message(request, messages.ERROR, 'Invalid team.')
             return redirect(reverse('teams_list_url'))
