@@ -1445,7 +1445,7 @@ class ViewsTests(TestCase):
 
         self.assertContains(response, "test_project_description")
 
-    def test_project_details_not_exisit(self):
+    def test_project_details_not_exists(self):
         student = Student.objects.get(username="student_username")
 
         user_create_team(student, "test_team")
