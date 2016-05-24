@@ -129,6 +129,9 @@ class ManageTeamsServicesTests(TestCase):
         user2 = Student(username='test_username2', email='test2@mail.com', student_no="1212")
         user2.save()
 
+        user3 = Student(username='test_username3', email='test3@mail.com', student_no="12321")
+        user3.save()
+
     def test_create_team(self):
         user = Student.objects.get(username='test_username')
 
@@ -138,6 +141,27 @@ class ManageTeamsServicesTests(TestCase):
         team = Team.objects.get(name="test_team")
         self.assertEqual(team.first_teammate, user)
         self.assertEqual(user.team, team)
+
+    def test_create_team_unique_name(self):
+        user = Student.objects.get(username='test_username')
+        user2 = Student.objects.get(username='test_username2')
+        user3 = Student.objects.get(username='test_username3')
+
+        user_create_team(user, "test_team")
+
+        user_create_team(user2, "test_team 2")
+
+        self.assertTrue(Team.objects.filter(name="test_team").exists())
+        self.assertTrue(Team.objects.filter(name="test_team 2").exists())
+
+        with self.assertRaisesMessage(TeamWithGivenNameAlreadyExists, ""):
+            user_create_team(user3, "test_team")
+
+        with self.assertRaisesMessage(TeamWithGivenNameAlreadyExists, ""):
+            user_create_team(user3, "TEST_TEAM")
+
+        with self.assertRaisesMessage(TeamWithGivenNameAlreadyExists, ""):
+            user_create_team(user3, "TEST_TEAM 2")
 
     def test_leave_one_person_team(self):
         user = Student.objects.get(username='test_username')

@@ -1,7 +1,7 @@
 from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
-    TeamIsFull, UserAssignedToProject
+    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists
 from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
 import random
 
@@ -32,6 +32,12 @@ def user_create_team(user, team_name):
 
     if user.team:
         raise UserAlreadyInTeam
+
+    try:
+        if Team.objects.get(name__iexact=team_name):
+            raise TeamWithGivenNameAlreadyExists
+    except Team.DoesNotExist:
+        pass
 
     team = Team()
     team.name = team_name

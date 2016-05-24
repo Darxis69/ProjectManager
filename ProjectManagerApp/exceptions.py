@@ -38,6 +38,10 @@ class TeamNotInProjectQueue(Exception):
     pass
 
 
+class TeamWithGivenNameAlreadyExists(Exception):
+    pass
+
+
 class InvalidPassword(Exception):
     pass
 
