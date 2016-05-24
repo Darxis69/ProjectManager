@@ -130,12 +130,11 @@ def logout(request):
 def delete_account(request):
     try:
         user_delete_account(request.user)
-        # auth_logout(request)
-        messages.add_message(request, messages.SUCCESS, 'Your account was deleted.')
     except UserAlreadyInTeam:
         messages.add_message(request, messages.ERROR, 'You can\'t delete your account now. Leave your team first.')
         return redirect(reverse('index_url'))
 
+    messages.add_message(request, messages.SUCCESS, 'Your account was deleted.')
     return redirect(reverse('account_login_url'))
 
 
