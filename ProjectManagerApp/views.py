@@ -423,12 +423,7 @@ class ProjectEditFormView(FormView):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        try:
-            project_id = self.kwargs['id']
-        except KeyError:
-            messages.add_message(request, messages.ERROR, 'Invalid project.')
-            return redirect(reverse('projects_list_url'))
-
+        project_id = self.kwargs['id']
         project_edit_form = ProjectEditForm(request.POST)
         if project_edit_form.is_valid():
             try:
