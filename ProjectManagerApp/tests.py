@@ -135,7 +135,6 @@ class ManageUsersServicesTests(TestCase):
         self.assertTrue(Student.objects.filter(username='student_username').exists())
 
 
-
 class ManageTeamsServicesTests(TestCase):
 
     def setUp(self):
@@ -672,6 +671,10 @@ class ViewsTests(TestCase):
         teach = Teacher(username='teacher_username', email="teacher@mail.com")
         teach.set_password('teacher_password')
         teach.save()
+
+        teach2 = Teacher(username='teacher_username_2', email="teacher_2@mail.com")
+        teach2.set_password('teacher_password')
+        teach2.save()
 
 
     #unlogged user - should be redirected to login view
@@ -1770,10 +1773,76 @@ class ViewsTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'Assigning completed. Assigned teams to 0 projects.')
 
-    # def test_project_edit_from_view(self):
-    #     self.client.login(username="teacher_username", password="teacher_password")
-    #     response = self.client.get(reverse('project_edit_url'), follow=True)
+    def test_project_edit_from_view(self):
+        teacher = Teacher.objects.get(username="teacher_username")
+        project = user_create_project(teacher, "test_project", "test_project_description")
 
+        self.client.login(username="teacher_username", password="teacher_password")
+
+        response = self.client.get(reverse('project_edit_url', kwargs={'id': project.id}))
+        self.assertEqual(response.status_code, 200)
+
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'new_name', 'description': 'new_desc'}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse('project_details_url', kwargs={'id': project.id}))
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Project edit success.')
+        project = Project.objects.get(pk=project.pk)
+        self.assertEqual(project.name, 'new_name')
+        self.assertEqual(project.description, 'new_desc')
+
+    def test_project_edit_from_view_invalid_project(self):
+        Teacher.objects.get(username="teacher_username")
+
+        self.client.login(username="teacher_username", password="teacher_password")
+
+        response = self.client.get(reverse('project_edit_url', kwargs={'id': '0'}))
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse('projects_list_url'))
+
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': '0'}), {'name': 'asd', 'description': 'desc'}, follow=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertRedirects(response, reverse('projects_list_url'))
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Invalid project.')
+
+    def test_project_edit_from_view_invalid_form(self):
+        teacher = Teacher.objects.get(username="teacher_username")
+        project = user_create_project(teacher, "test_project", "test_project_description")
+
+        self.client.login(username="teacher_username", password="teacher_password")
+
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'asd', 'description': ''})
+        self.assertEqual(response.status_code, 200)
+        project = Project.objects.get(pk=project.pk)
+        self.assertTrue(project.description, 'test_project_description')
+
+    def test_project_edit_from_view_other_author(self):
+        teacher = Teacher.objects.get(username="teacher_username")
+        project = user_create_project(teacher, "test_project", "test_project_description")
+
+        self.client.login(username="teacher_username_2", password="teacher_password")
+
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'asd', 'description': 'desc'})
+        self.assertEqual(response.status_code, 200)
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Only author can edit project.')
+
+    def test_project_edit_from_view_unique_name(self):
+        teacher = Teacher.objects.get(username="teacher_username")
+        user_create_project(teacher, "test_project", "test_project_description")
+        project2 = user_create_project(teacher, "test_project_2", "test_project_2_description")
+
+        self.client.login(username="teacher_username", password="teacher_password")
+
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project2.id}), {'name': 'test_project', 'description': 'test_project_2_description'})
+        self.assertEqual(response.status_code, 200)
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Project with given name already exists.')
 
     # test wrong path
     def test_error_view(self):
