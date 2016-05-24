@@ -415,7 +415,7 @@ class ProjectEditFormView(FormView):
 
     def get(self, request, *args, **kwargs):
         try:
-            project_id = request.GET.get('id')
+            project_id = self.kwargs['id']
             context = self.get_context_data(project_id)
         except (KeyError, Project.DoesNotExist):
             messages.add_message(request, messages.ERROR, 'Invalid project.')
@@ -425,7 +425,7 @@ class ProjectEditFormView(FormView):
 
     def post(self, request, *args, **kwargs):
         try:
-            project_id = request.GET.get('id')
+            project_id = self.kwargs['id']
         except KeyError:
             messages.add_message(request, messages.ERROR, 'Invalid project.')
             return redirect(reverse('projects_list_url'))
@@ -438,6 +438,9 @@ class ProjectEditFormView(FormView):
             except ProjectWithGivenNameAlreadyExists:
                 messages.add_message(request, messages.ERROR, 'Project with given name already exists.')
                 return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
+            except Project.DoesNotExist:
+                messages.add_message(request, messages.ERROR, 'Invalid project.')
+                return redirect(reverse('projects_list_url'))
 
             messages.add_message(request, messages.SUCCESS, 'Project edit success.')
             return redirect('project_details_url', id=project_id)

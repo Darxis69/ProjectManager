@@ -8,7 +8,7 @@
                 <div style="float:right; font-size: 80%; position: relative; top:-10px;"><a href="{% url 'project_details_url' id=project_id %}">Return to project details</a></div>
             </div>
             <div class="panel-body">
-                <form action="{% url 'project_edit_url' %}?id={{ project_id }}" method="POST" class="form">
+                <form action="{% url 'project_edit_url' id=project_id %}" method="POST" class="form">
                     {% csrf_token %}
                     {% bootstrap_form project_edit_form %}
                     {% buttons %}
