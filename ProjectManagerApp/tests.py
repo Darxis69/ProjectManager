@@ -1563,26 +1563,28 @@ class ViewsTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'You have no team. Join or create your own team first.')
 
-    # def test_project_leave_already_assigned(self):
-    #     student = Student.objects.get(username="student_username")
-    #     teacher = Teacher.objects.get(username="teacher_username")
-    #
-    #     user_create_project(teacher, "test_project", "test_project_description")
-    #     user_create_team(student, "test_team")
-    #
-    #     project = Project.objects.get(name="test_project")
-    #     team = Team.objects.create(name="test_team2")
-    #     project.assigned_team = team
-    #     project.save()
-    #
-    #     self.client.login(username="student_username", password="student_password")
-    #     response = self.client.post(reverse('project_leave_url'), {'project_id': project.id}, follow=True)
-    #
-    #     self.assertRedirects(response, reverse('projects_list_url'))
-    #
-    #     messages = list(response.context['messages'])
-    #     self.assertEqual(len(messages), 1)
-    #     self.assertEqual(str(messages[0]), 'This project has already an assigned team.')
+    def test_project_leave_already_assigned(self):
+        student = Student.objects.get(username="student_username")
+        teacher = Teacher.objects.get(username="teacher_username")
+
+        user_create_project(teacher, "test_project", "test_project_description")
+        user_create_team(student, "test_team")
+
+        project = Project.objects.get(name="test_project")
+        user_team_join_project(student, project)
+
+        team = Team.objects.create(name="test_team2")
+        project.assigned_team = team
+        project.save()
+
+        self.client.login(username="student_username", password="student_password")
+        response = self.client.post(reverse('project_leave_url'), {'project_id': project.id}, follow=True)
+    
+        self.assertRedirects(response, reverse('projects_list_url'))
+
+        messages = list(response.context['messages'])
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'This project has already an assigned team.')
 
     def test_project_leave_team_not_in_project_queue(self):
         teacher = Teacher.objects.get(username="teacher_username")
