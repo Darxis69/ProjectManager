@@ -418,7 +418,7 @@ class ProjectEditFormView(FormView):
             context = self.get_context_data(project_id)
         except (KeyError, Project.DoesNotExist):
             messages.add_message(request, messages.ERROR, 'Invalid project.')
-            return redirect(reverse('projects_details_url'))
+            return redirect(reverse('projects_list_url'))
 
         return render(request, self.template_name, context)
 
