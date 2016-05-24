@@ -12,7 +12,7 @@ from django.views.generic import TemplateView
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
-    TeamIsFull, UserAssignedToProject
+    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, \
     AccountChangeEmailForm, AccountChangePasswordForm, ProjectEditForm
 from ProjectManagerApp.models import Project, Team, Student, Teacher
@@ -261,6 +261,9 @@ class TeamCreateFormView(FormView):
             except UserAlreadyInTeam:
                 messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
                 return redirect(reverse('teams_list_url'))
+            except TeamWithGivenNameAlreadyExists:
+                messages.add_message(request, messages.ERROR, 'Team with given name already exists.')
+                return render(request, self.template_name, self.create_context_data(team_create_form))
 
             messages.add_message(request, messages.SUCCESS, 'Team created.')
             return redirect(reverse('teams_list_url'))
@@ -429,8 +432,12 @@ class ProjectEditFormView(FormView):
 
         project_edit_form = ProjectEditForm(request.POST)
         if project_edit_form.is_valid():
-            user_edit_project(request.user, project_id, project_edit_form.cleaned_data.get('name'),
-                              project_edit_form.cleaned_data.get('description'))
+            try:
+                user_edit_project(request.user, project_id, project_edit_form.cleaned_data.get('name'),
+                                  project_edit_form.cleaned_data.get('description'))
+            except ProjectWithGivenNameAlreadyExists:
+                messages.add_message(request, messages.ERROR, 'Project with given name already exists.')
+                return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
 
             messages.add_message(request, messages.SUCCESS, 'Project edit success.')
             return redirect('project_details_url', id=project_id)
