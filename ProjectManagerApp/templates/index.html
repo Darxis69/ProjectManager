@@ -32,10 +32,10 @@
                 </div>
                 {% elif user_team_applied_project %}
                 <div class="panel-body">
-                    <p>Your team is waiting for: <a href="{% url 'project_details_url' id=user_team_assigned_project.id %}">{{ user_team_applied_project.name|truncatechars:max_field_length }}</a></p>
+                    <p>Your team is waiting for: <a href="{% url 'project_details_url' id=user_team_applied_project.id %}">{{ user_team_applied_project.name|truncatechars:max_field_length }}</a></p>
                 </div>
                 <div class="list-group">
-                    <a href="{% url 'project_details_url' id=user_team_assigned_project.id %}" class="list-group-item">
+                    <a href="{% url 'project_details_url' id=user_team_applied_project.id %}" class="list-group-item">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> View your project</a>
                     <a href="{% url 'projects_list_url' %}" class="list-group-item">
                         <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> Choose another project</a>
