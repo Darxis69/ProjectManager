@@ -339,6 +339,7 @@ class ManageProjectsServicesTests(TestCase):
         user = Teacher()
         team = Team()
         project = Project()
+        project.author = user
         project.assigned_team = team
 
         with self.assertRaisesMessage(ProjectHasAssignedTeam, ""):
@@ -1751,7 +1752,7 @@ class ViewsTests(TestCase):
         self.assertRedirects(response, reverse('project_details_url', kwargs={'id': project.id}))
         messages = list(response.context['messages'])
         self.assertEqual(len(messages), 1)
-        self.assertEqual(str(messages[0]), 'Project edit success.')
+        self.assertEqual(str(messages[0]), 'All changes were saved.')
         project = Project.objects.get(pk=project.pk)
         self.assertEqual(project.name, 'new_name')
         self.assertEqual(project.description, 'new_desc')
