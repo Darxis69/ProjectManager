@@ -16,7 +16,9 @@
                 <div class="well well-sm" style="background-color: white; font-size: 90%;">
                     {{ project.description|linebreaksbr }}
                 </div>
-                <a href="{% url 'project_edit_url' id=project.id %}">{% bootstrap_button "Edit" button_type="button" button_class="btn btn-primary" %}</a>
+                {% if is_teacher and not project.assigned_team and request.user == project.author %}
+                    <a href="{% url 'project_edit_url' id=project.id %}">{% bootstrap_button "Edit" button_type="button" button_class="btn btn-primary" %}</a>
+                {% endif %}
             </div>
         </div>
     </div>

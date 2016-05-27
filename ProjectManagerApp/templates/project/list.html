@@ -42,7 +42,7 @@
                                         {% endif %}
                                     </td>
                                     <td align="center">
-                                        {% if is_teacher and not project.assigned_team %}
+                                        {% if is_teacher and not project.assigned_team and request.user == project.author %}
                                             <form method="post" action="{% url 'project_delete_url' %}" name="project_delete_form">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="project_id" value="{{ project.id }}" />

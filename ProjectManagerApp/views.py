@@ -12,13 +12,14 @@ from django.views.generic import TemplateView
 from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
-    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists, OnlyAuthorCanEditProjectException
+    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists, MustBeAuthor
 from ProjectManagerApp.forms import LoginForm, AccountCreateForm, ProjectCreateForm, TeamCreateForm, \
     AccountChangeEmailForm, AccountChangePasswordForm, ProjectEditForm
 from ProjectManagerApp.models import Project, Team, Student, Teacher
 from ProjectManagerApp.services import user_join_team, user_create_team, user_team_leave, user_delete_project, \
     user_create_project, user_team_join_project, account_create_teacher, account_create_student, \
-    user_team_leave_project, user_change_email, user_change_password, assign_teams_to_projects, user_delete_account, user_edit_project
+    user_team_leave_project, user_change_email, user_change_password, assign_teams_to_projects, user_delete_account, \
+    user_edit_project
 
 
 class AccountCreateFormView(FormView):
@@ -305,7 +306,8 @@ def team_assign(request):
     #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
     #     return redirect(reverse('index_url'))
 
-    messages.add_message(request, messages.INFO, 'Assigning completed. Assigned teams to ' + repr(projects_assigned) + ' projects.')
+    messages.add_message(request, messages.INFO,
+                         'Assigning completed. Assigned teams to ' + repr(projects_assigned) + ' projects.')
     return redirect(reverse('projects_list_url'))
 
 
@@ -380,7 +382,7 @@ class ProjectCreateFormView(FormView):
         if project_create_form.is_valid():
             # try:
             user_create_project(request.user, project_create_form.cleaned_data.get('name'),
-                                    project_create_form.cleaned_data.get('description'))
+                                project_create_form.cleaned_data.get('description'))
             # except MustBeTeacher:
             #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to create projects.')
             #     return redirect(reverse('projects_list_url'))
@@ -429,14 +431,14 @@ class ProjectEditFormView(FormView):
             except ProjectWithGivenNameAlreadyExists:
                 messages.add_message(request, messages.ERROR, 'Project with given name already exists.')
                 return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
-            except OnlyAuthorCanEditProjectException:
+            except MustBeAuthor:
                 messages.add_message(request, messages.ERROR, 'Only author can edit project.')
                 return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
             except Project.DoesNotExist:
                 messages.add_message(request, messages.ERROR, 'Invalid project.')
                 return redirect(reverse('projects_list_url'))
 
-            messages.add_message(request, messages.SUCCESS, 'Project edit success.')
+            messages.add_message(request, messages.SUCCESS, 'All changes were saved.')
             return redirect('project_details_url', id=project_id)
 
         return render(request, self.template_name, self.create_context_data(project_edit_form, project_id))
@@ -527,6 +529,9 @@ def project_delete(request):
     # except MustBeTeacher:
     #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to delete projects.')
     #     return redirect(reverse('projects_list_url'))
+    except MustBeAuthor:
+        messages.add_message(request, messages.ERROR, 'Only author can delete a project.')
+        return redirect(reverse('projects_list_url'))
     except ProjectHasAssignedTeam:
         messages.add_message(request, messages.ERROR, 'You cannot delete a project that has an assigned team.')
         return redirect(reverse('projects_list_url'))

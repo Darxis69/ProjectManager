@@ -1,7 +1,7 @@
 from ProjectManagerApp.exceptions import UserAlreadyInTeam, MustBeStudent, UserNotInTeam, MustBeTeacher, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
-    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists, OnlyAuthorCanEditProjectException
+    TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists, MustBeAuthor
 from ProjectManagerApp.models import Student, Team, Teacher, Project, UserBase
 import random
 
@@ -151,6 +151,9 @@ def user_delete_project(user, project):
     if not isinstance(user, Teacher):
         raise MustBeTeacher
 
+    if project.author != user:
+        raise MustBeAuthor
+
     if project.assigned_team:
         raise ProjectHasAssignedTeam
 
@@ -183,7 +186,7 @@ def user_edit_project(user, project_id, project_name, project_description):
     project = Project.objects.get(pk=project_id)
 
     if project.author != user:
-        raise OnlyAuthorCanEditProjectException
+        raise MustBeAuthor
 
     if Project.objects.exclude(pk=project_id).filter(name__iexact=project_name).exists():
         raise ProjectWithGivenNameAlreadyExists

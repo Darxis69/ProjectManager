@@ -22,7 +22,7 @@ class ProjectWithGivenNameAlreadyExists(Exception):
     pass
 
 
-class OnlyAuthorCanEditProjectException(Exception):
+class MustBeAuthor(Exception):
     pass
 
 
