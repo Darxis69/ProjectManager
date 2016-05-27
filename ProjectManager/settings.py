@@ -150,5 +150,7 @@ STATIC_URL = '/static/'
 LOGIN_URL = '/account/login/'
 
 # Messages configuration
-
 MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+# Close the session when user closes the browser
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
