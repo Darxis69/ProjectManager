@@ -44,5 +44,3 @@ def projects_count(request):
 
 def max_field_length(request):
     return {'max_field_length': 15}
-
-

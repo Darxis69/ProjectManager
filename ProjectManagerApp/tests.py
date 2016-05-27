@@ -585,7 +585,7 @@ class ManageProjectsServicesTests(TestCase):
         student2.save()
 
         user_create_team(student1, "test_team")
-        user_join_team(student2,student1.team)
+        user_join_team(student2, student1.team)
 
         user_team_join_project(student1, project)
 
@@ -632,11 +632,12 @@ class ManageProjectsServicesTests(TestCase):
         project.save()
         project.refresh_from_db()
 
-        with self.assertRaisesMessage(OnlyAuthorCanEditProjectException, ""):
+        with self.assertRaisesMessage(MustBeAuthor, ""):
             user_edit_project(teach2, project.id, 'new_project_name', 'new_project_description')
 
         self.assertTrue(Project.objects.filter(name='test_project', description='test_description').exists())
-        self.assertFalse(Project.objects.filter(name='new_project_name', description='new_project_description').exists())
+        self.assertFalse(Project.objects.filter(name='new_project_name',
+                                                description='new_project_description').exists())
 
     def test_user_edit_project_name_already_exist(self):
         teach = Teacher(username='teacher_username', email="teacher@mail.com")
@@ -676,8 +677,7 @@ class ViewsTests(TestCase):
         teach2.set_password('teacher_password')
         teach2.save()
 
-
-    #unlogged user - should be redirected to login view
+    # unlogged user - should be redirected to login view
     def test_unlogged_user_get_index(self):
         response = self.client.get(reverse('index_url'))
         self.assertRedirects(response, reverse('account_login_url') + '?next=' + reverse('index_url'))
@@ -690,7 +690,6 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('teams_list_url'))
         self.assertRedirects(response, reverse('account_login_url') + '?next=' + reverse('teams_list_url'))
 
-
     # login tests
     def test_student_login(self):
         login = self.client.login(username='student_username', password='student_password')
@@ -701,21 +700,24 @@ class ViewsTests(TestCase):
         self.assertTrue(login)
 
     def test_student_login_from_view(self):
-        response = self.client.post(reverse('account_login_url'), {'username': 'student_username', 'password': 'student_password'})
+        response = self.client.post(reverse('account_login_url'), {'username': 'student_username',
+                                                                   'password': 'student_password'})
         self.assertRedirects(response, reverse('index_url'))
 
         response = self.client.get(reverse('teams_list_url'))
         self.assertEqual(response.status_code, 200)
 
     def test_teacher_login_from_view(self):
-        response = self.client.post(reverse('account_login_url'), {'username': 'teacher_username', 'password': 'teacher_password'})
+        response = self.client.post(reverse('account_login_url'), {'username': 'teacher_username',
+                                                                   'password': 'teacher_password'})
         self.assertRedirects(response, reverse('index_url'))
 
         response = self.client.get(reverse('teams_list_url'))
         self.assertEqual(response.status_code, 200)
 
     def test_user_login_from_view_with_next(self):
-        response = self.client.post(reverse('account_login_url') + '?next=' + reverse('projects_list_url'), {'username': 'student_username', 'password': 'student_password'})
+        response = self.client.post(reverse('account_login_url') + '?next=' + reverse('projects_list_url'),
+                                    {'username': 'student_username', 'password': 'student_password'})
         self.assertRedirects(response, reverse('projects_list_url'))
 
     def test_not_existing_user_login_from_view(self):
@@ -727,7 +729,8 @@ class ViewsTests(TestCase):
         self.assertEqual(str(messages[0]), 'Username or password is incorrect. Try again.')
 
     def test_student_wrong_password_login_from_view(self):
-        response = self.client.post(reverse('account_login_url'), {'username': 'student_username', 'password': 'wrong_pass'})
+        response = self.client.post(reverse('account_login_url'), {'username': 'student_username',
+                                                                   'password': 'wrong_pass'})
         self.assertEqual(response.status_code, 200)
 
         messages = list(response.context['messages'])
@@ -735,7 +738,8 @@ class ViewsTests(TestCase):
         self.assertEqual(str(messages[0]), 'Username or password is incorrect. Try again.')
 
     def test_teacher_wrong_password_login_from_view(self):
-        response = self.client.post(reverse('account_login_url'), {'username': 'teacher_username', 'password': 'wrong_pass'})
+        response = self.client.post(reverse('account_login_url'), {'username': 'teacher_username',
+                                                                   'password': 'wrong_pass'})
         self.assertEqual(response.status_code, 200)
 
         messages = list(response.context['messages'])
@@ -751,7 +755,6 @@ class ViewsTests(TestCase):
         response = self.client.post(reverse('account_login_url'), {'username': 'test', 'password': 'test_pass'})
         self.assertRedirects(response, reverse('index_url'))
 
-
     # logout tests
     def test_logout(self):
         self.client.login(username='student_username', password='student_password')
@@ -760,18 +763,17 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('projects_list_url'))
         self.assertRedirects(response, reverse('account_login_url') + '?next=' + reverse('projects_list_url'))
 
-
     # account create tests
     def test_student_account_create_from_view(self):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_stud_username',
-                                                         'email': 'test@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "1",
-                                                         'student_no': "1234"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_stud_username',
+                                                                    'email': 'test@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "1",
+                                                                    'student_no': "1234"})
 
         self.assertRedirects(response, reverse('account_login_url'))
 
@@ -781,11 +783,11 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_teacher_username',
-                                                         'email': 'test@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "2"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_teacher_username',
+                                                                    'email': 'test@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "2"})
 
         self.assertRedirects(response, reverse('account_login_url'))
 
@@ -795,11 +797,11 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'teacher_username',
-                                                         'email': 'test@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "2"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'teacher_username',
+                                                                    'email': 'test@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "2"})
 
         self.assertEqual(response.status_code, 200)
 
@@ -809,11 +811,11 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_stud_username',
-                                                         'email': 'student@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "2"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_stud_username',
+                                                                    'email': 'student@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "2"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'User with given email already exists.')
@@ -822,12 +824,12 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_stud_username',
-                                                         'email': 'test@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "1",
-                                                         'student_no': "1111"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_stud_username',
+                                                                    'email': 'test@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "1",
+                                                                    'student_no': "1111"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Student with given student no already exists.')
@@ -836,12 +838,12 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_stud_username',
-                                                         'email': 'wrong@mail',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "1",
-                                                         'student_no': "1111"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_stud_username',
+                                                                    'email': 'wrong@mail',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "1",
+                                                                    'student_no': "1111"})
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Enter a valid email address.')
@@ -850,12 +852,12 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_stud_username',
-                                                         'email': 'test@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "1",
-                                                         'student_no': "1234"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_stud_username',
+                                                                    'email': 'test@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "1",
+                                                                    'student_no': "1234"})
 
         self.assertRedirects(response, reverse('account_login_url'))
 
@@ -868,22 +870,22 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_create_url'))
         self.assertRedirects(response, reverse('index_url'))
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_teacher_username',
-                                                         'email': 'test@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "2"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_teacher_username',
+                                                                    'email': 'test@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "2"})
         self.assertRedirects(response, reverse('index_url'))
 
     def test_teacher_account_login_after_create(self):
         response = self.client.get(reverse('account_create_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_create_url'),{ 'username': 'test_teacher_username',
-                                                         'email': 'test@mail.com',
-                                                         'password': "test_pass",
-                                                         'password_repeat': "test_pass",
-                                                         'account_type': "2"})
+        response = self.client.post(reverse('account_create_url'), {'username': 'test_teacher_username',
+                                                                    'email': 'test@mail.com',
+                                                                    'password': "test_pass",
+                                                                    'password_repeat': "test_pass",
+                                                                    'account_type': "2"})
 
         self.assertRedirects(response, reverse('account_login_url'))
 
@@ -932,7 +934,7 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_change_email_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_change_email_url'),{ 'new_email': 'test@123.pl'})
+        response = self.client.post(reverse('account_change_email_url'), {'new_email': 'test@123.pl'})
         self.assertEqual(response.status_code, 200)
 
         messages = list(response.context['messages'])
@@ -946,7 +948,7 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_change_email_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_change_email_url'),{ 'new_email': 'wrong@mail'})
+        response = self.client.post(reverse('account_change_email_url'), {'new_email': 'wrong@mail'})
         self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, 'Enter a valid email address.')
@@ -960,7 +962,7 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_change_email_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_change_email_url'),{ 'new_email': 'test@123.pl'})
+        response = self.client.post(reverse('account_change_email_url'), {'new_email': 'test@123.pl'})
         self.assertEqual(response.status_code, 200)
 
         messages = list(response.context['messages'])
@@ -975,9 +977,9 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_change_password_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_change_password_url'),{ 'current_password': 'student_password',
-                                                                 'new_password': "new_password",
-                                                                 'new_password_repeat': "new_password"})
+        response = self.client.post(reverse('account_change_password_url'), {'current_password': 'student_password',
+                                                                             'new_password': "new_password",
+                                                                             'new_password_repeat': "new_password"})
         self.assertEqual(response.status_code, 200)
 
         messages = list(response.context['messages'])
@@ -992,9 +994,9 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('account_change_password_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_change_password_url'),{ 'current_password': 'wrong_password',
-                                                                 'new_password': "new_password",
-                                                                 'new_password_repeat': "new_password"})
+        response = self.client.post(reverse('account_change_password_url'), {'current_password': 'wrong_password',
+                                                                             'new_password': "new_password",
+                                                                             'new_password_repeat': "new_password"})
         self.assertEqual(response.status_code, 200)
 
         messages = list(response.context['messages'])
@@ -1002,20 +1004,20 @@ class ViewsTests(TestCase):
         self.assertEqual(str(messages[0]), 'Invalid current password.')
 
         student = Student.objects.get(username="student_username")
-        self.assertTrue(student.check_password("student_password")) # check if still old-one
+        self.assertTrue(student.check_password("student_password"))  # check if still old-one
 
     def test_change_password_from_view_repeat_not_match(self):
         self.client.login(username="student_username", password="student_password")
         response = self.client.get(reverse('account_change_password_url'))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('account_change_password_url'),{ 'current_password': 'student_password',
-                                                                 'new_password': "new_password",
-                                                                 'new_password_repeat': "new_password2"})
+        response = self.client.post(reverse('account_change_password_url'), {'current_password': 'student_password',
+                                                                             'new_password': "new_password",
+                                                                             'new_password_repeat': "new_password2"})
         self.assertEqual(response.status_code, 200)
 
         student = Student.objects.get(username="student_username")
-        self.assertTrue(student.check_password("student_password")) # check if still old-one
+        self.assertTrue(student.check_password("student_password"))  # check if still old-one
 
     # team view
     def test_team_create_from_view(self):
@@ -1301,7 +1303,7 @@ class ViewsTests(TestCase):
         self.assertEqual(student2.team, None)
         self.assertTrue(Team.objects.filter(name="test_team").exists())
 
-        self.assertEqual(team.first_teammate,student)
+        self.assertEqual(team.first_teammate, student)
         self.assertEqual(team.second_teammate, None)
         self.assertEqual(student.team, team)
 
@@ -1349,14 +1351,14 @@ class ViewsTests(TestCase):
         self.assertEqual(len(messages), 1)
         self.assertEqual(str(messages[0]), 'You can\'t leave a team assigned to a project.')
 
-    #project view
+    # project view
     def test_project_create_from_view(self):
         self.client.login(username="teacher_username", password="teacher_password")
         response = self.client.get(reverse('project_create_url'))
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('project_create_url'), {'name': 'test_project',
-                                                          'description': 'test_project_description'},
+                                                                    'description': 'test_project_description'},
                                     follow=True)
 
         self.assertRedirects(response, reverse('projects_list_url'))
@@ -1371,7 +1373,7 @@ class ViewsTests(TestCase):
         self.client.login(username="student_username", password="student_password")
 
         response = self.client.post(reverse('project_create_url'), {'name': 'test_project',
-                                                          'description': 'test_project_description'},
+                                                                    'description': 'test_project_description'},
                                     follow=True)
 
         self.assertEqual(response.status_code, 200)
@@ -1389,7 +1391,7 @@ class ViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
         response = self.client.post(reverse('project_create_url'), {'name': 'test_project',
-                                                          'description': ''},
+                                                                    'description': ''},
                                     follow=True)
 
         self.assertEqual(response.status_code, 200)
@@ -1666,7 +1668,7 @@ class ViewsTests(TestCase):
 
         project = Project.objects.get(name="test_project")
 
-        project.assigned_team = Team.objects.get(name= "test_team")
+        project.assigned_team = Team.objects.get(name="test_team")
         project.save()
 
         self.client.login(username="teacher_username", password="teacher_password")
@@ -1782,7 +1784,9 @@ class ViewsTests(TestCase):
         response = self.client.get(reverse('project_edit_url', kwargs={'id': project.id}))
         self.assertEqual(response.status_code, 200)
 
-        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'new_name', 'description': 'new_desc'}, follow=True)
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'new_name',
+                                                                                             'description': 'new_desc'},
+                                    follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse('project_details_url', kwargs={'id': project.id}))
         messages = list(response.context['messages'])
@@ -1801,7 +1805,9 @@ class ViewsTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertRedirects(response, reverse('projects_list_url'))
 
-        response = self.client.post(reverse('project_edit_url', kwargs={'id': '0'}), {'name': 'asd', 'description': 'desc'}, follow=True)
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': '0'}), {'name': 'asd',
+                                                                                      'description': 'desc'},
+                                    follow=True)
         self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse('projects_list_url'))
         messages = list(response.context['messages'])
@@ -1814,7 +1820,8 @@ class ViewsTests(TestCase):
 
         self.client.login(username="teacher_username", password="teacher_password")
 
-        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'asd', 'description': ''})
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'asd',
+                                                                                             'description': ''})
         self.assertEqual(response.status_code, 200)
         project = Project.objects.get(pk=project.pk)
         self.assertTrue(project.description, 'test_project_description')
@@ -1825,7 +1832,8 @@ class ViewsTests(TestCase):
 
         self.client.login(username="teacher_username_2", password="teacher_password")
 
-        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'asd', 'description': 'desc'})
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project.id}), {'name': 'asd',
+                                                                                             'description': 'desc'})
         self.assertEqual(response.status_code, 200)
         messages = list(response.context['messages'])
         self.assertEqual(len(messages), 1)
@@ -1838,7 +1846,8 @@ class ViewsTests(TestCase):
 
         self.client.login(username="teacher_username", password="teacher_password")
 
-        response = self.client.post(reverse('project_edit_url', kwargs={'id': project2.id}), {'name': 'test_project', 'description': 'test_project_2_description'})
+        response = self.client.post(reverse('project_edit_url', kwargs={'id': project2.id}),
+                                    {'name': 'test_project', 'description': 'test_project_2_description'})
         self.assertEqual(response.status_code, 200)
         messages = list(response.context['messages'])
         self.assertEqual(len(messages), 1)
@@ -1849,7 +1858,7 @@ class ViewsTests(TestCase):
         response = self.client.get('/wrong_path/')
         self.assertEqual(response.status_code, 404)
 
-        self.assertTemplateUsed(response,'http_error.html')
+        self.assertTemplateUsed(response, 'http_error.html')
 
 
 # MODELS TESTS (db integrity)
@@ -1882,64 +1891,64 @@ class ModelsTests(TestCase):
 class FormsTests(TestCase):
 
     def test_account_create_form(self):
-        data = { 'username': 'test_stud_username',
-                 'email': 'test@mail.com',
-                 'password': "test_pass",
-                 'password_repeat': "test_pass",
-                 'account_type': "1",
-                 'student_no': "1234"}
+        data = {'username': 'test_stud_username',
+                'email': 'test@mail.com',
+                'password': "test_pass",
+                'password_repeat': "test_pass",
+                'account_type': "1",
+                'student_no': "1234"}
         form = AccountCreateForm(data=data)
         self.assertTrue(form.is_valid())
 
     def test_account_create_form_pass_repeat(self):
-        data = { 'username': 'test_stud_username',
-                 'email': 'test@mail.com',
-                 'password': "test_pass",
-                 'password_repeat': "test_pass2",
-                 'account_type': "1",
-                 'student_no': "1234"}
+        data = {'username': 'test_stud_username',
+                'email': 'test@mail.com',
+                'password': "test_pass",
+                'password_repeat': "test_pass2",
+                'account_type': "1",
+                'student_no': "1234"}
         form = AccountCreateForm(data=data)
         self.assertFalse(form.is_valid())
 
     def test_account_create_form_no_stud_no(self):
-        data = { 'username': 'test_stud_username',
-                 'email': 'test@mail.com',
-                 'password': "test_pass",
-                 'password_repeat': "test_pass",
-                 'account_type': "1",}
+        data = {'username': 'test_stud_username',
+                'email': 'test@mail.com',
+                'password': "test_pass",
+                'password_repeat': "test_pass",
+                'account_type': "1", }
         form = AccountCreateForm(data=data)
         self.assertFalse(form.is_valid())
 
     def test_account_create_form_stud_no_not_a_number(self):
-        data = { 'username': 'test_stud_username',
-                 'email': 'test@mail.com',
-                 'password': "test_pass",
-                 'password_repeat': "test_pass",
-                 'account_type': "1",
-                 'student_no': "wrong_number"}
+        data = {'username': 'test_stud_username',
+                'email': 'test@mail.com',
+                'password': "test_pass",
+                'password_repeat': "test_pass",
+                'account_type': "1",
+                'student_no': "wrong_number"}
         form = AccountCreateForm(data=data)
         self.assertFalse(form.is_valid())
 
     def test_account_change_password(self):
-        data = { 'current_password': "1234",
-                 'new_password': "new_pass",
-                 'new_password_repeat': "new_pass" }
+        data = {'current_password': "1234",
+                'new_password': "new_pass",
+                'new_password_repeat': "new_pass"}
         form = AccountChangePasswordForm(data=data)
         self.assertTrue(form.is_valid())
 
     def test_account_change_password_not_matching(self):
-        data = { 'current_password': "1234",
-                 'new_password': "new_pass",
-                 'new_password_repeat': "wrong_pass" }
+        data = {'current_password': "1234",
+                'new_password': "new_pass",
+                'new_password_repeat': "wrong_pass"}
         form = AccountChangePasswordForm(data=data)
         self.assertFalse(form.is_valid())
 
     def test_account_change_email(self):
-        data = { 'new_email': "test@mail.com"}
+        data = {'new_email': "test@mail.com"}
         form = AccountChangeEmailForm(data=data)
         self.assertTrue(form.is_valid())
 
     def test_account_change_email_invaild(self):
-        data = { 'new_email': "test@mail"}
+        data = {'new_email': "test@mail"}
         form = AccountChangeEmailForm(data=data)
         self.assertFalse(form.is_valid())
