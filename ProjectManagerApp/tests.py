@@ -1361,10 +1361,6 @@ class ViewsTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertRedirects(response, reverse('index_url'))
 
-        # messages = list(response.context['messages'])
-        # self.assertEqual(len(messages), 1)
-        # self.assertEqual(str(messages[0]), 'Only teachers are allowed to create projects.')
-
         self.assertFalse(Project.objects.filter(name='test_project', description='test_project_description').exists())
 
     def test_project_create_from_view_with_wrong_forms(self):
