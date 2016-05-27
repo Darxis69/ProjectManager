@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import FormView
 from django.views.generic import TemplateView
 
-from ProjectManagerApp.exceptions import MustBeStudent, UserAlreadyInTeam, UserNotInTeam, MustBeTeacher, \
+from ProjectManagerApp.exceptions import UserAlreadyInTeam, UserNotInTeam, \
     ProjectHasAssignedTeam, UserWithGivenUsernameAlreadyExists, StudentWithGivenStudentNoAlreadyExists, \
     TeamAlreadyInProjectQueue, TeamNotInProjectQueue, UserWithGivenEmailAlreadyExists, InvalidPassword, \
     TeamIsFull, UserAssignedToProject, TeamWithGivenNameAlreadyExists, ProjectWithGivenNameAlreadyExists, MustBeAuthor
@@ -254,10 +254,6 @@ class TeamCreateFormView(FormView):
         if team_create_form.is_valid():
             try:
                 user_create_team(request.user, team_create_form.cleaned_data.get('name'))
-            # except MustBeStudent:
-            #     messages.add_message(request, messages.ERROR, 'Only students are allowed to create a team.')
-            #     return redirect(reverse('teams_list_url'))
-
             except UserAlreadyInTeam:
                 messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
                 return redirect(reverse('teams_list_url'))
@@ -283,9 +279,6 @@ def team_join(request):
 
     try:
         user_join_team(request.user, team)
-    # except MustBeStudent:
-    #     messages.add_message(request, messages.ERROR, 'Only students are allowed to join a team.')
-    #     return redirect(reverse('teams_list_url'))
     except UserAlreadyInTeam:
         messages.add_message(request, messages.ERROR, 'You already have a team. Quit your team first.')
         return redirect(reverse('teams_list_url'))
@@ -300,12 +293,7 @@ def team_join(request):
 @login_required
 @user_passes_test(lambda u: isinstance(u, Teacher))
 def team_assign(request):
-    # try:
     projects_assigned = assign_teams_to_projects(request.user)
-    # except MustBeTeacher:
-    #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to assign teams to projects.')
-    #     return redirect(reverse('index_url'))
-
     messages.add_message(request, messages.INFO,
                          'Assigning completed. Assigned teams to ' + repr(projects_assigned) + ' projects.')
     return redirect(reverse('projects_list_url'))
@@ -331,9 +319,6 @@ class TeamDetailsView(TemplateView):
 def team_leave(request):
     try:
         user_team_leave(request.user)
-    # except MustBeStudent:
-    #     messages.add_message(request, messages.ERROR, 'You must be a student to quit a team.')
-    #     return redirect(reverse('teams_list_url'))
     except UserNotInTeam:
         messages.add_message(request, messages.ERROR, 'You must be in a team in order to quit it.')
         return redirect(reverse('teams_list_url'))
@@ -380,13 +365,8 @@ class ProjectCreateFormView(FormView):
     def post(self, request, *args, **kwargs):
         project_create_form = ProjectCreateForm(request.POST)
         if project_create_form.is_valid():
-            # try:
             user_create_project(request.user, project_create_form.cleaned_data.get('name'),
                                 project_create_form.cleaned_data.get('description'))
-            # except MustBeTeacher:
-            #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to create projects.')
-            #     return redirect(reverse('projects_list_url'))
-
             messages.add_message(request, messages.SUCCESS, 'Project created.')
             return redirect(reverse('projects_list_url'))
 
@@ -456,9 +436,6 @@ def project_join(request):
 
     try:
         user_team_join_project(request.user, project)
-    # except MustBeStudent:
-    #     messages.add_message(request, messages.ERROR, 'Only students are allowed to assign their team to a project.')
-    #     return redirect(reverse('projects_list_url'))
     except UserNotInTeam:
         messages.add_message(request, messages.ERROR, 'You have no team. Join or create your own team first.')
         return redirect(reverse('projects_list_url'))
@@ -484,9 +461,6 @@ def project_leave(request):
 
     try:
         user_team_leave_project(request.user, project)
-    # except MustBeStudent:
-    #     messages.add_message(request, messages.ERROR, 'Only students are allowed to assign their team to a project.')
-    #     return redirect(reverse('projects_list_url'))
     except UserNotInTeam:
         messages.add_message(request, messages.ERROR, 'You have no team. Join or create your own team first.')
         return redirect(reverse('projects_list_url'))
@@ -526,9 +500,6 @@ def project_delete(request):
 
     try:
         user_delete_project(request.user, project)
-    # except MustBeTeacher:
-    #     messages.add_message(request, messages.ERROR, 'Only teachers are allowed to delete projects.')
-    #     return redirect(reverse('projects_list_url'))
     except MustBeAuthor:
         messages.add_message(request, messages.ERROR, 'Only author can delete a project.')
         return redirect(reverse('projects_list_url'))
