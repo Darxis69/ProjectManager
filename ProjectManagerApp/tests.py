@@ -133,6 +133,7 @@ class ManageUsersServicesTests(TestCase):
         self.assertTrue(Student.objects.filter(username='student_username').exists())
 
 
+
 class ManageTeamsServicesTests(TestCase):
 
     def setUp(self):
@@ -344,6 +345,17 @@ class ManageProjectsServicesTests(TestCase):
 
         with self.assertRaisesMessage(ProjectHasAssignedTeam, ""):
             user_delete_project(user, project)
+
+    def test_delete_project_with_assigned_team(self):
+        user = Teacher()
+        team = Team()
+        project = Project()
+        project.author = user
+
+        user2 = Teacher()
+
+        with self.assertRaisesMessage(MustBeAuthor, ""):
+            user_delete_project(user2, project)
 
     def test_create_project(self):
         user = Teacher()
