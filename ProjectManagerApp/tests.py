@@ -1,7 +1,5 @@
 from django.test import TestCase
 
-from ProjectManagerApp.exceptions import ProjectWithGivenNameAlreadyExists
-from .models import User, Student, Teacher, Team, Project
 from .services import *
 from django.core.urlresolvers import reverse
 from django.db import IntegrityError
@@ -27,7 +25,7 @@ class CreateUsersServicesTests(TestCase):
         self.assertEqual(user.student_no, 1234)
         self.assertEqual(user.email, "test@mail.com")
 
-    def test_create_student_with_the_same_studnet_no(self):
+    def test_create_student_with_the_same_student_no(self):
         account_create_student("1234", "test_student_username", "test@mail.com", "test_pass")
 
         with self.assertRaisesMessage(StudentWithGivenStudentNoAlreadyExists, ""):
@@ -400,7 +398,6 @@ class ManageProjectsServicesTests(TestCase):
         user_create_team(user2, "test_team")
 
         self.assertTrue(Team.objects.filter(name="test_team").exists())
-        team = Team.objects.get(name="test_team")
 
         user_team_join_project(user2, project)
 
@@ -462,7 +459,6 @@ class ManageProjectsServicesTests(TestCase):
         user_create_team(user2, "test_team")
 
         self.assertTrue(Team.objects.filter(name="test_team").exists())
-        team = Team.objects.get(name="test_team")
 
         user_team_join_project(user2, project)
 
@@ -489,7 +485,6 @@ class ManageProjectsServicesTests(TestCase):
         user_create_team(user2, "test_team")
 
         self.assertTrue(Team.objects.filter(name="test_team").exists())
-        team = Team.objects.get(name="test_team")
 
         user_team_join_project(user2, project)
 
@@ -559,12 +554,11 @@ class ManageProjectsServicesTests(TestCase):
         user_create_team(user2, "test_team")
 
         self.assertTrue(Team.objects.filter(name="test_team").exists())
-        team = Team.objects.get(name="test_team")
 
         with self.assertRaisesMessage(TeamNotInProjectQueue, ""):
             user_team_leave_project(user2, project)
 
-    def test_assign_teams_to_project_as_studnet(self):
+    def test_assign_teams_to_project_as_student(self):
         user = Student()
 
         with self.assertRaisesMessage(MustBeTeacher, ""):
@@ -758,7 +752,7 @@ class ViewsTests(TestCase):
     # logout tests
     def test_logout(self):
         self.client.login(username='student_username', password='student_password')
-        response = self.client.get(reverse('account_logout_url'))
+        self.client.get(reverse('account_logout_url'))
 
         response = self.client.get(reverse('projects_list_url'))
         self.assertRedirects(response, reverse('account_login_url') + '?next=' + reverse('projects_list_url'))
@@ -894,8 +888,6 @@ class ViewsTests(TestCase):
         self.assertTrue(login)
 
     def test_delete_account(self):
-        student = Student.objects.get(username="student_username")
-
         self.client.login(username='student_username', password='student_password')
         response = self.client.post(reverse('account_delete_url'), follow=True)
         self.assertRedirects(response, reverse('account_login_url'))
@@ -1052,10 +1044,6 @@ class ViewsTests(TestCase):
 
         self.assertRedirects(response, reverse('index_url'))
 
-        # messages = list(response.context['messages'])
-        # self.assertEqual(len(messages), 1)
-        # self.assertEqual(str(messages[0]), 'Only students are allowed to create a team.')
-
         self.assertFalse(Team.objects.filter(name='test_team').exists())
 
     def test_team_create_already_in_team(self):
@@ -1080,8 +1068,6 @@ class ViewsTests(TestCase):
         student2.save()
 
         user_create_team(student2, "test_team")
-
-        student = Student.objects.get(username="student_username")
 
         self.client.login(username="student_username", password="student_password")
 
@@ -1169,8 +1155,6 @@ class ViewsTests(TestCase):
         self.assertEqual(str(messages[0]), 'The selected team is already full.')
 
     def test_team_join_team_not_exist(self):
-        student = Student.objects.get(username="student_username")
-
         self.client.login(username="student_username", password="student_password")
 
         response = self.client.post(reverse('team_join_url'), {'team_id': 1}, follow=True)
@@ -1209,8 +1193,6 @@ class ViewsTests(TestCase):
         self.assertTemplateUsed(response, 'team/details.html')
 
     def test_team_details_team_not_exist(self):
-        student = Student.objects.get(username="student_username")
-
         self.client.login(username="student_username", password="student_password")
 
         response = self.client.get(reverse('team_details_url', kwargs={'id': 123}), follow=True)
@@ -1270,7 +1252,7 @@ class ViewsTests(TestCase):
         self.assertEqual(student.team, None)
         self.assertTrue(Team.objects.filter(name="test_team").exists())
 
-        self.assertEqual(team.first_teammate,student2)
+        self.assertEqual(team.first_teammate, student2)
         self.assertEqual(team.second_teammate, None)
         self.assertEqual(student2.team, team)
 
@@ -1441,13 +1423,8 @@ class ViewsTests(TestCase):
 
         self.assertRedirects(response, reverse('index_url'))
 
-        # messages = list(response.context['messages'])
-        # self.assertEqual(len(messages), 1)
-        # self.assertEqual(str(messages[0]), 'Only students are allowed to assign their team to a project.')
-
     def test_project_join_user_not_in_team(self):
         teacher = Teacher.objects.get(username="teacher_username")
-        student = Student.objects.get(username="student_username")
 
         user_create_project(teacher, "test_project", "test_project_description")
 
@@ -1474,7 +1451,7 @@ class ViewsTests(TestCase):
         project2 = Project.objects.get(name="test_project2")
 
         self.client.login(username="student_username", password="student_password")
-        response = self.client.post(reverse('project_join_url'), {'project_id': project.id}, follow=True)
+        self.client.post(reverse('project_join_url'), {'project_id': project.id}, follow=True)
 
         response = self.client.post(reverse('project_join_url'), {'project_id': project2.id}, follow=True)
 
@@ -1516,16 +1493,15 @@ class ViewsTests(TestCase):
         project = Project.objects.get(name="test_project")
 
         self.client.login(username="student_username", password="student_password")
-        response = self.client.post(reverse('project_join_url'), {'project_id': project.id}, follow=True)
+        self.client.post(reverse('project_join_url'), {'project_id': project.id}, follow=True)
 
         self.assertTrue(project.all_teams.filter(name=student.team.name).exists())
 
-        response = self.client.post(reverse('project_leave_url'), {'project_id': project.id}, follow=True)
+        self.client.post(reverse('project_leave_url'), {'project_id': project.id}, follow=True)
 
         self.assertFalse(project.all_teams.filter(name=student.team.name).exists())
 
     def test_project_leave_not_exist(self):
-        student = Student.objects.get(username="student_username")
         self.client.login(username="student_username", password="student_password")
 
         response = self.client.post(reverse('project_leave_url'), {'project_id': 1}, follow=True)
@@ -1547,10 +1523,6 @@ class ViewsTests(TestCase):
         response = self.client.post(reverse('project_leave_url'), {'project_id': project.id}, follow=True)
 
         self.assertRedirects(response, reverse('index_url'))
-
-        # messages = list(response.context['messages'])
-        # self.assertEqual(len(messages), 1)
-        # self.assertEqual(str(messages[0]), 'Only students are allowed to assign their team to a project.')
 
     def test_project_leave_user_not_in_team(self):
         teacher = Teacher.objects.get(username="teacher_username")
@@ -1682,8 +1654,6 @@ class ViewsTests(TestCase):
         self.assertEqual(str(messages[0]), 'You cannot delete a project that has an assigned team.')
 
     def test_project_delete_not_exist(self):
-        teacher = Teacher.objects.get(username="teacher_username")
-
         self.client.login(username="teacher_username", password="teacher_password")
         response = self.client.post(reverse('project_delete_url'), {'project_id': 1}, follow=True)
 
@@ -1703,10 +1673,6 @@ class ViewsTests(TestCase):
         response = self.client.post(reverse('project_delete_url'), {'project_id': project.id}, follow=True)
 
         self.assertRedirects(response, reverse('index_url'))
-
-        # messages = list(response.context['messages'])
-        # self.assertEqual(len(messages), 1)
-        # self.assertEqual(str(messages[0]), 'Only teachers are allowed to delete projects.')
 
         self.assertTrue(Project.objects.filter(name="test_project").exists())
 
@@ -1758,8 +1724,6 @@ class ViewsTests(TestCase):
 
         user_create_project(teacher, "test_project", "test_project_description")
         user_create_team(student, "test_team")
-
-        team = Team.objects.get(name="test_team")
 
         project = Project.objects.get(name="test_project")
 
@@ -1865,7 +1829,7 @@ class ViewsTests(TestCase):
 
 class ModelsTests(TestCase):
 
-    def test_create_studnet_with_the_same_username(self):
+    def test_create_student_with_the_same_username(self):
         user = Student(username='test_username', student_no=1234)
         user.set_password('test_password')
         user.save()
@@ -1875,7 +1839,7 @@ class ModelsTests(TestCase):
         with self.assertRaises(IntegrityError):
             user.save()
 
-    def test_create_studnet_with_the_same_student_no(self):
+    def test_create_student_with_the_same_student_no(self):
         user = Student(username='test_username', student_no=1234)
         user.set_password('test_password')
         user.save()
